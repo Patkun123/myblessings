@@ -10,17 +10,21 @@ Built with **Expo SDK 58**, **React Native 0.88**, **Expo Router**, **NativeWind
 
 ## Status
 
-**Phase 1 — Foundation** is complete:
+**Phase 1 — Foundation** is complete, plus the first slice of Phase 2:
 
-- Expo Router shell: onboarding → PIN setup → tab shell, plus a full-screen lock gate.
+- Expo Router shell: onboarding (profile → PIN → **first wallet**) → tab shell, plus a
+  full-screen lock gate and a persistent app bar.
 - SQLite schema for all nine tables, generated migrations, and `PRAGMA foreign_keys` / WAL.
-- Idempotent profile seeding (system categories + a default wallet).
+- Idempotent profile seeding of system categories. **Wallets are never seeded** — the user names
+  each wallet and enters its opening balance.
+- Manual wallet creation: name, opening balance (money already in the wallet), and a kind preset.
 - Money helpers (integer centavos) and derived wallet balances.
 - Base UI kit: Button, Card, Input, MoneyInput, Modal, Sheet, FAB, Snackbar, EmptyState.
-- Jest suite covering money math, the schema's constraints, and the PIN verifier.
+- Jest suite covering money math, wallet validation, the schema's constraints, and the PIN
+  verifier.
 
-Phase 2 (profiles, wallets, transfers, backup/restore) is next. See the implementation plan at
-`~/.opencode/plan/MyBlessings-Implementation-Plan-v1.1.md`.
+Next: recording income and expenses (Phase 3), then budgets (Phase 5). See the implementation
+plan at `~/.opencode/plan/MyBlessings-Implementation-Plan-v1.1.md`.
 
 ## Commands
 

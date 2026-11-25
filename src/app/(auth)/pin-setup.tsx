@@ -52,7 +52,8 @@ export default function PinSetupScreen() {
     setBusy(true);
     try {
       await setPin(userId, next);
-      router.replace('/(tabs)');
+      // Wallets are never seeded, so the first one is part of onboarding.
+      router.replace('/(auth)/wallet-setup');
     } catch (cause) {
       setBusy(false);
       setValue('');

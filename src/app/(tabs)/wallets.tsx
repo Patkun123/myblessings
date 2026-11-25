@@ -1,7 +1,10 @@
+import { router } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { FAB } from '@/components/ui/FAB';
 import { Screen } from '@/components/ui/Screen';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { WalletRow } from '@/components/wallet/WalletRow';
@@ -21,21 +24,29 @@ export default function WalletsScreen() {
         <EmptyState
           icon="wallet-outline"
           title="No wallets yet"
-          message="Create a wallet for cash, savings, a church fund, or a business account."
+          message="Add cash on hand, a bank account, or an e-wallet to start recording."
+          action={<Button label="Create wallet" onPress={() => router.push('/wallet/new')} />}
         />
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
-          <Card className="py-1">
-            {wallets.map((wallet, index) => (
-              <View
-                key={wallet.id}
-                className={index === wallets.length - 1 ? undefined : 'border-b border-line'}
-              >
-                <WalletRow wallet={wallet} />
-              </View>
-            ))}
-          </Card>
-        </ScrollView>
+        <>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 96 }}
+          >
+            <Card className="py-1">
+              {wallets.map((wallet, index) => (
+                <View
+                  key={wallet.id}
+                  className={index === wallets.length - 1 ? undefined : 'border-b border-line'}
+                >
+                  <WalletRow wallet={wallet} />
+                </View>
+              ))}
+            </Card>
+          </ScrollView>
+
+          <FAB icon="add" label="Add wallet" onPress={() => router.push('/wallet/new')} />
+        </>
       )}
     </Screen>
   );

@@ -1,14 +1,17 @@
-import { and, eq, isNull } from 'drizzle-orm';
-
-import { DEFAULT_CATEGORIES, DEFAULT_WALLET } from '@/constants/categories';
+import { DEFAULT_CATEGORIES } from '@/constants/categories';
 import type { AppDatabase } from '@/db/client';
-import { category, settings, wallet } from '@/db/schema';
+import { category, settings } from '@/db/schema';
 import { newId } from '@/utils/id';
 
 /**
- * Idempotently seeds a profile: settings row, system categories, and a default
- * wallet. Safe to call on every launch — unique indexes + ON CONFLICT DO NOTHING
- * make it a no-op after the first run.
+ * Idempotently seeds a profile: settings row and system categories.
+ *
+ * Wallets are deliberately **not** seeded — the user creates every wallet and
+ * enters its opening balance themselves, so a fresh profile starts with no
+ * wallets and is taken through wallet setup before the tabs open.
+ *
+ * Safe to call on every launch: unique indexes + ON CONFLICT DO NOTHING make it
+ * a no-op after the first run.
  */
 export async function seedProfile(database: AppDatabase, userId: string): Promise<void> {
   await database.insert(settings).values({ userId }).onConflictDoNothing();
@@ -28,22 +31,4 @@ export async function seedProfile(database: AppDatabase, userId: string): Promis
       }))
     )
     .onConflictDoNothing();
-
-  const existingWallet = await database
-    .select({ id: wallet.id })
-    .from(wallet)
-    .where(and(eq(wallet.userId, userId), isNull(wallet.deletedAt)))
-    .limit(1);
-
-  if (existingWallet.length === 0) {
-    await database.insert(wallet).values({
-      id: newId(),
-      userId,
-      name: DEFAULT_WALLET.name,
-      icon: DEFAULT_WALLET.icon,
-      color: DEFAULT_WALLET.color,
-      openingBalanceCentavos: 0,
-      sortOrder: 0,
-    });
-  }
 }

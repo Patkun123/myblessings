@@ -1,0 +1,59 @@
+import { Ionicons } from '@expo/vector-icons';
+import { Redirect, router } from 'expo-router';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { WalletForm, type WalletFormValues } from '@/components/wallet/WalletForm';
+import { colors } from '@/constants/theme';
+import { createWallet } from '@/db/queries/wallet';
+import { useSessionStore } from '@/stores/sessionStore';
+
+/**
+ * Third onboarding step: the first wallet.
+ *
+ * Wallets are never seeded, so this step is required — the ledger has nothing
+ * to record against until one exists. Every value here is typed by the user.
+ */
+export default function WalletSetupScreen() {
+  const activeUserId = useSessionStore((state) => state.activeUserId);
+
+  if (!activeUserId) {
+    return <Redirect href="/(auth)/welcome" />;
+  }
+
+  const userId = activeUserId;
+
+  async function handleCreate(values: WalletFormValues) {
+    await createWallet({ userId, ...values });
+    router.replace('/(tabs)');
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-canvas">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 48, paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="h-12 w-12 items-center justify-center rounded-2xl bg-brand-light">
+            <Ionicons name="wallet" size={24} color={colors.brand} />
+          </View>
+
+          <Text className="mt-5 text-3xl font-bold text-ink">Create your first wallet</Text>
+          <Text className="mt-2 text-base leading-6 text-ink-muted">
+            A wallet is where money lives — cash on hand, a bank account, or an e-wallet. You can
+            add more later.
+          </Text>
+
+          <View className="mt-8">
+            <WalletForm submitLabel="Create wallet" onSubmit={handleCreate} />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}

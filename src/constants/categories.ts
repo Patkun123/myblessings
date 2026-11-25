@@ -1,5 +1,6 @@
 import type { CategoryType } from '@/db/schema';
 import { colors } from '@/constants/theme';
+import type { IconName } from '@/types/icons';
 
 export type DefaultCategory = {
   name: string;
@@ -42,8 +43,15 @@ export const DEFAULT_CATEGORIES: readonly DefaultCategory[] = [
   { name: 'Other Expense', icon: 'remove-circle', color: colors.inkMuted, type: 'expense' },
 ];
 
-export const DEFAULT_WALLET = {
-  name: 'Cash',
-  icon: 'wallet',
-  color: colors.brand,
-} as const;
+/**
+ * Starting points for the "new wallet" form. Nothing is created automatically:
+ * the user names every wallet and enters its opening balance themselves.
+ */
+export const WALLET_PRESETS = [
+  { id: 'cash', label: 'Cash', icon: 'cash', color: colors.brand },
+  { id: 'bank', label: 'Bank', icon: 'business', color: colors.inkMuted },
+  { id: 'ewallet', label: 'E-wallet', icon: 'phone-portrait', color: colors.accent },
+  { id: 'savings', label: 'Savings', icon: 'shield-checkmark', color: colors.income },
+] as const satisfies readonly { id: string; label: string; icon: IconName; color: string }[];
+
+export type WalletPreset = (typeof WALLET_PRESETS)[number];
