@@ -1,17 +1,29 @@
 {
   "expo": {
-    "name": "myblessings",
+    "name": "MyBlessings",
     "slug": "myblessings",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "myblessings",
     "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.myblessings.app"
     },
     "android": {
+      "package": "com.myblessings.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#E6F4F0",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -19,6 +31,7 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
+      "bundler": "metro",
       "favicon": "./assets/favicon.png"
     }
   }

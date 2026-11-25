@@ -1,0 +1,1337 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "27ba97bc-505e-4631-bfbd-cdc1707b6505",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "budget": {
+      "name": "budget",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "wallet_id": {
+          "name": "wallet_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "limit_centavos": {
+          "name": "limit_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "period": {
+          "name": "period",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "carry_over": {
+          "name": "carry_over",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "last_notified_threshold": {
+          "name": "last_notified_threshold",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ix_budget_user": {
+          "name": "ix_budget_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        },
+        "ux_budget_wallet_category": {
+          "name": "ux_budget_wallet_category",
+          "columns": [
+            "user_id",
+            "category_id",
+            "wallet_id",
+            "period"
+          ],
+          "isUnique": true,
+          "where": "\"budget\".\"wallet_id\" IS NOT NULL AND \"budget\".\"category_id\" IS NOT NULL AND \"budget\".\"deleted_at\" IS NULL"
+        },
+        "ux_budget_wallet": {
+          "name": "ux_budget_wallet",
+          "columns": [
+            "user_id",
+            "wallet_id",
+            "period"
+          ],
+          "isUnique": true,
+          "where": "\"budget\".\"wallet_id\" IS NOT NULL AND \"budget\".\"category_id\" IS NULL AND \"budget\".\"deleted_at\" IS NULL"
+        },
+        "ux_budget_category": {
+          "name": "ux_budget_category",
+          "columns": [
+            "user_id",
+            "category_id",
+            "period"
+          ],
+          "isUnique": true,
+          "where": "\"budget\".\"wallet_id\" IS NULL AND \"budget\".\"category_id\" IS NOT NULL AND \"budget\".\"deleted_at\" IS NULL"
+        },
+        "ux_budget_global": {
+          "name": "ux_budget_global",
+          "columns": [
+            "user_id",
+            "period"
+          ],
+          "isUnique": true,
+          "where": "\"budget\".\"wallet_id\" IS NULL AND \"budget\".\"category_id\" IS NULL AND \"budget\".\"deleted_at\" IS NULL"
+        }
+      },
+      "foreignKeys": {
+        "budget_user_id_user_id_fk": {
+          "name": "budget_user_id_user_id_fk",
+          "tableFrom": "budget",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "budget_category_id_category_id_fk": {
+          "name": "budget_category_id_category_id_fk",
+          "tableFrom": "budget",
+          "tableTo": "category",
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "budget_wallet_id_wallet_id_fk": {
+          "name": "budget_wallet_id_wallet_id_fk",
+          "tableFrom": "budget",
+          "tableTo": "wallet",
+          "columnsFrom": [
+            "wallet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_budget_limit_positive": {
+          "name": "ck_budget_limit_positive",
+          "value": "\"budget\".\"limit_centavos\" > 0"
+        },
+        "ck_budget_threshold": {
+          "name": "ck_budget_threshold",
+          "value": "\"budget\".\"last_notified_threshold\" IN (0, 75, 90, 100)"
+        }
+      }
+    },
+    "category": {
+      "name": "category",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pricetag'"
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'#5F736C'"
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_system": {
+          "name": "is_system",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "is_archived": {
+          "name": "is_archived",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ix_category_user_type": {
+          "name": "ix_category_user_type",
+          "columns": [
+            "user_id",
+            "type"
+          ],
+          "isUnique": false
+        },
+        "ux_category_name": {
+          "name": "ux_category_name",
+          "columns": [
+            "user_id",
+            "type",
+            "name"
+          ],
+          "isUnique": true,
+          "where": "\"category\".\"deleted_at\" IS NULL"
+        }
+      },
+      "foreignKeys": {
+        "category_user_id_user_id_fk": {
+          "name": "category_user_id_user_id_fk",
+          "tableFrom": "category",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "pledge": {
+      "name": "pledge",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "wallet_id": {
+          "name": "wallet_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "donor_name": {
+          "name": "donor_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "purpose": {
+          "name": "purpose",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "pledged_centavos": {
+          "name": "pledged_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "due_date": {
+          "name": "due_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ix_pledge_user": {
+          "name": "ix_pledge_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "pledge_user_id_user_id_fk": {
+          "name": "pledge_user_id_user_id_fk",
+          "tableFrom": "pledge",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pledge_wallet_id_wallet_id_fk": {
+          "name": "pledge_wallet_id_wallet_id_fk",
+          "tableFrom": "pledge",
+          "tableTo": "wallet",
+          "columnsFrom": [
+            "wallet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_pledge_amount_positive": {
+          "name": "ck_pledge_amount_positive",
+          "value": "\"pledge\".\"pledged_centavos\" > 0"
+        }
+      }
+    },
+    "recurring_rule": {
+      "name": "recurring_rule",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "wallet_id": {
+          "name": "wallet_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "amount_centavos": {
+          "name": "amount_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "frequency": {
+          "name": "frequency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "next_occurrence": {
+          "name": "next_occurrence",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ix_recurring_user_active": {
+          "name": "ix_recurring_user_active",
+          "columns": [
+            "user_id",
+            "is_active"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "recurring_rule_user_id_user_id_fk": {
+          "name": "recurring_rule_user_id_user_id_fk",
+          "tableFrom": "recurring_rule",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "recurring_rule_wallet_id_wallet_id_fk": {
+          "name": "recurring_rule_wallet_id_wallet_id_fk",
+          "tableFrom": "recurring_rule",
+          "tableTo": "wallet",
+          "columnsFrom": [
+            "wallet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "recurring_rule_category_id_category_id_fk": {
+          "name": "recurring_rule_category_id_category_id_fk",
+          "tableFrom": "recurring_rule",
+          "tableTo": "category",
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_recurring_amount_positive": {
+          "name": "ck_recurring_amount_positive",
+          "value": "\"recurring_rule\".\"amount_centavos\" > 0"
+        }
+      }
+    },
+    "settings": {
+      "name": "settings",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "biometric_enabled": {
+          "name": "biometric_enabled",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "theme": {
+          "name": "theme",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'light'"
+        },
+        "locale": {
+          "name": "locale",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'en-PH'"
+        },
+        "last_backup_at": {
+          "name": "last_backup_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "settings_user_id_user_id_fk": {
+          "name": "settings_user_id_user_id_fk",
+          "tableFrom": "settings",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "transaction": {
+      "name": "transaction",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "wallet_id": {
+          "name": "wallet_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "amount_centavos": {
+          "name": "amount_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "occurred_on": {
+          "name": "occurred_on",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "transfer_id": {
+          "name": "transfer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "recurring_id": {
+          "name": "recurring_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "recurrence_occurrence": {
+          "name": "recurrence_occurrence",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "pledge_id": {
+          "name": "pledge_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "donor_name": {
+          "name": "donor_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ix_txn_user_date": {
+          "name": "ix_txn_user_date",
+          "columns": [
+            "user_id",
+            "occurred_on"
+          ],
+          "isUnique": false
+        },
+        "ix_txn_wallet_date": {
+          "name": "ix_txn_wallet_date",
+          "columns": [
+            "user_id",
+            "wallet_id",
+            "occurred_on"
+          ],
+          "isUnique": false
+        },
+        "ix_txn_category_date": {
+          "name": "ix_txn_category_date",
+          "columns": [
+            "user_id",
+            "category_id",
+            "occurred_on"
+          ],
+          "isUnique": false
+        },
+        "ux_txn_recurrence_occurrence": {
+          "name": "ux_txn_recurrence_occurrence",
+          "columns": [
+            "recurring_id",
+            "recurrence_occurrence"
+          ],
+          "isUnique": true,
+          "where": "\"transaction\".\"recurring_id\" IS NOT NULL"
+        },
+        "ux_txn_transfer_leg": {
+          "name": "ux_txn_transfer_leg",
+          "columns": [
+            "transfer_id",
+            "type"
+          ],
+          "isUnique": true,
+          "where": "\"transaction\".\"transfer_id\" IS NOT NULL"
+        },
+        "ix_txn_pledge": {
+          "name": "ix_txn_pledge",
+          "columns": [
+            "pledge_id"
+          ],
+          "isUnique": false,
+          "where": "\"transaction\".\"pledge_id\" IS NOT NULL"
+        }
+      },
+      "foreignKeys": {
+        "transaction_user_id_user_id_fk": {
+          "name": "transaction_user_id_user_id_fk",
+          "tableFrom": "transaction",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "transaction_wallet_id_wallet_id_fk": {
+          "name": "transaction_wallet_id_wallet_id_fk",
+          "tableFrom": "transaction",
+          "tableTo": "wallet",
+          "columnsFrom": [
+            "wallet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "transaction_category_id_category_id_fk": {
+          "name": "transaction_category_id_category_id_fk",
+          "tableFrom": "transaction",
+          "tableTo": "category",
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "transaction_transfer_id_transfer_id_fk": {
+          "name": "transaction_transfer_id_transfer_id_fk",
+          "tableFrom": "transaction",
+          "tableTo": "transfer",
+          "columnsFrom": [
+            "transfer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "transaction_recurring_id_recurring_rule_id_fk": {
+          "name": "transaction_recurring_id_recurring_rule_id_fk",
+          "tableFrom": "transaction",
+          "tableTo": "recurring_rule",
+          "columnsFrom": [
+            "recurring_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "transaction_pledge_id_pledge_id_fk": {
+          "name": "transaction_pledge_id_pledge_id_fk",
+          "tableFrom": "transaction",
+          "tableTo": "pledge",
+          "columnsFrom": [
+            "pledge_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_txn_amount_positive": {
+          "name": "ck_txn_amount_positive",
+          "value": "\"transaction\".\"amount_centavos\" > 0"
+        },
+        "ck_txn_occurred_on_format": {
+          "name": "ck_txn_occurred_on_format",
+          "value": "\"transaction\".\"occurred_on\" GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'"
+        }
+      }
+    },
+    "transfer": {
+      "name": "transfer",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "from_wallet_id": {
+          "name": "from_wallet_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "to_wallet_id": {
+          "name": "to_wallet_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "amount_centavos": {
+          "name": "amount_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "occurred_on": {
+          "name": "occurred_on",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ix_transfer_user_date": {
+          "name": "ix_transfer_user_date",
+          "columns": [
+            "user_id",
+            "occurred_on"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "transfer_user_id_user_id_fk": {
+          "name": "transfer_user_id_user_id_fk",
+          "tableFrom": "transfer",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "transfer_from_wallet_id_wallet_id_fk": {
+          "name": "transfer_from_wallet_id_wallet_id_fk",
+          "tableFrom": "transfer",
+          "tableTo": "wallet",
+          "columnsFrom": [
+            "from_wallet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "transfer_to_wallet_id_wallet_id_fk": {
+          "name": "transfer_to_wallet_id_wallet_id_fk",
+          "tableFrom": "transfer",
+          "tableTo": "wallet",
+          "columnsFrom": [
+            "to_wallet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_transfer_amount_positive": {
+          "name": "ck_transfer_amount_positive",
+          "value": "\"transfer\".\"amount_centavos\" > 0"
+        },
+        "ck_transfer_distinct_wallets": {
+          "name": "ck_transfer_distinct_wallets",
+          "value": "\"transfer\".\"from_wallet_id\" <> \"transfer\".\"to_wallet_id\""
+        }
+      }
+    },
+    "user": {
+      "name": "user",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "avatar_uri": {
+          "name": "avatar_uri",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ux_user_email": {
+          "name": "ux_user_email",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "wallet": {
+      "name": "wallet",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'wallet'"
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'#0E6B57'"
+        },
+        "opening_balance_centavos": {
+          "name": "opening_balance_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "is_archived": {
+          "name": "is_archived",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ix_wallet_user": {
+          "name": "ix_wallet_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "wallet_user_id_user_id_fk": {
+          "name": "wallet_user_id_user_id_fk",
+          "tableFrom": "wallet",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}
