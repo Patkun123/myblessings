@@ -1,12 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 
-import { colors } from '@/constants/theme';
 import type { TransactionKind } from '@/domain/transaction';
-
-const OPTIONS: readonly { value: TransactionKind; label: string; tint: string }[] = [
-  { value: 'expense', label: 'Expense', tint: colors.expense },
-  { value: 'income', label: 'Income', tint: colors.income },
-];
+import { useThemeColors } from '@/stores/themeStore';
 
 type TypeToggleProps = {
   value: TransactionKind;
@@ -15,9 +10,15 @@ type TypeToggleProps = {
 
 /** Expense / income switch. The selected side takes its semantic colour. */
 export function TypeToggle({ value, onChange }: TypeToggleProps) {
+  const themeColors = useThemeColors();
+  const options: readonly { value: TransactionKind; label: string; tint: string }[] = [
+    { value: 'expense', label: 'Expense', tint: themeColors.expense },
+    { value: 'income', label: 'Income', tint: themeColors.income },
+  ];
+
   return (
     <View className="flex-row rounded-xl bg-canvas p-1">
-      {OPTIONS.map((option) => {
+      {options.map((option) => {
         const selected = option.value === value;
 
         return (
@@ -31,7 +32,7 @@ export function TypeToggle({ value, onChange }: TypeToggleProps) {
             style={
               selected
                 ? {
-                    backgroundColor: colors.surface,
+                    backgroundColor: themeColors.surface,
                     borderWidth: 1,
                     borderColor: option.tint,
                   }
@@ -40,7 +41,7 @@ export function TypeToggle({ value, onChange }: TypeToggleProps) {
           >
             <Text
               className="text-sm font-semibold"
-              style={{ color: selected ? option.tint : colors.inkMuted }}
+              style={{ color: selected ? option.tint : themeColors.inkMuted }}
             >
               {option.label}
             </Text>

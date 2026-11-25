@@ -51,7 +51,7 @@ export function SnackbarHost() {
     >
       <Animated.View
         style={{ opacity, transform: [{ translateY }] }}
-        className="mx-5 flex-row items-center gap-3 rounded-xl bg-ink px-4 py-3"
+        className="mx-5 flex-row items-center gap-3 rounded-xl border border-transparent bg-[#0F172A] px-4 py-3 dark:border-line dark:bg-[#1E2B45]"
       >
         <Text className="flex-1 text-sm text-white" numberOfLines={2}>
           {current.message}
@@ -65,7 +65,7 @@ export function SnackbarHost() {
               hide();
             }}
           >
-            <Text className="text-sm font-semibold text-brand-light">{current.action.label}</Text>
+            <Text className="text-sm font-semibold text-[#93C5FD]">{current.action.label}</Text>
           </Pressable>
         ) : null}
       </Animated.View>

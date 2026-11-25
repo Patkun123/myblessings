@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 
-import { colors } from '@/constants/theme';
+import { useThemeColors } from '@/stores/themeStore';
 import type { IconName } from '@/types/icons';
 
 type PickerFieldProps = {
@@ -24,9 +24,12 @@ export function PickerField({
   placeholder,
   onPress,
   icon,
-  iconColor = colors.inkFaint,
+  iconColor,
   error,
 }: PickerFieldProps) {
+  const themeColors = useThemeColors();
+  const resolvedIconColor = iconColor ?? themeColors.inkFaint;
+
   return (
     <View>
       <Text className="mb-1.5 text-sm font-medium text-ink-muted">{label}</Text>
@@ -41,9 +44,9 @@ export function PickerField({
         {icon ? (
           <View
             className="mr-2.5 h-8 w-8 items-center justify-center rounded-full"
-            style={{ backgroundColor: `${iconColor}1A` }}
+            style={{ backgroundColor: `${resolvedIconColor}1A` }}
           >
-            <Ionicons name={icon} size={16} color={iconColor} />
+            <Ionicons name={icon} size={16} color={resolvedIconColor} />
           </View>
         ) : null}
         <Text
@@ -52,7 +55,7 @@ export function PickerField({
         >
           {value ?? placeholder}
         </Text>
-        <Ionicons name="chevron-down" size={18} color={colors.inkFaint} />
+        <Ionicons name="chevron-down" size={18} color={themeColors.inkFaint} />
       </Pressable>
       {error ? <Text className="mt-1.5 text-sm text-expense">{error}</Text> : null}
     </View>

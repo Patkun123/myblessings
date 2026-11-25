@@ -1,23 +1,53 @@
 /**
  * Design tokens shared between TypeScript and Tailwind.
- * Keep these values in sync with `tailwind.config.js`.
+ * Keep these values in sync with `global.css` and `tailwind.config.js`.
  */
-export const colors = {
-  brand: '#0E6B57',
-  brandDark: '#0A4F41',
-  brandLight: '#E6F4F0',
+export const lightColors = {
+  brand: '#1B3B6F',
+  brandDark: '#12284D',
+  brandLight: '#EBF1FA',
   accent: '#B58A1B',
   accentLight: '#FBF3D9',
   income: '#15803D',
   expense: '#B42318',
   warning: '#B54708',
-  ink: '#0F1B17',
-  inkMuted: '#5F736C',
-  inkFaint: '#8A9A94',
-  canvas: '#F6F9F8',
+  ink: '#0F172A',
+  inkMuted: '#52637A',
+  inkFaint: '#8494A7',
+  canvas: '#F5F7FB',
   surface: '#FFFFFF',
-  line: '#E2EAE6',
+  line: '#DCE3EE',
 } as const;
+
+export const darkColors = {
+  brand: '#3568C4',
+  brandDark: '#16325C',
+  brandLight: '#172642',
+  accent: '#D4A72C',
+  accentLight: '#332912',
+  income: '#22C55E',
+  expense: '#F87171',
+  warning: '#FB923C',
+  ink: '#EEF2F9',
+  inkMuted: '#9BA8BD',
+  inkFaint: '#68778E',
+  canvas: '#0B111E',
+  surface: '#131C2E',
+  line: '#23314B',
+} as const;
+
+export type ThemeColors = {
+  readonly [K in keyof typeof lightColors]: string;
+};
+
+export type ColorScheme = 'light' | 'dark';
+
+/** Default light palette for static seeds (category/wallet hex colors). */
+export const colors = lightColors;
+
+export function getThemeColors(scheme: ColorScheme): ThemeColors {
+  return scheme === 'dark' ? darkColors : lightColors;
+}
 
 export const spacing = {
   xs: 4,

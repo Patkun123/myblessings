@@ -30,7 +30,7 @@ export function Modal({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <View className="flex-1 items-center justify-center bg-black/40 px-6">
+      <View className="flex-1 items-center justify-center bg-black/40 px-6 dark:bg-black/60">
         <Pressable
           className="absolute inset-0"
           accessibilityRole="button"
@@ -38,7 +38,7 @@ export function Modal({
           onPress={dismissable ? onClose : undefined}
           disabled={!dismissable}
         />
-        <View className="w-full max-w-sm rounded-card bg-surface p-5">
+        <View className="w-full max-w-sm rounded-card border border-line bg-surface p-5">
           {title ? <Text className="text-lg font-semibold text-ink">{title}</Text> : null}
           {message ? (
             <Text className="mt-1.5 text-sm leading-5 text-ink-muted">{message}</Text>

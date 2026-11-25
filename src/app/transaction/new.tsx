@@ -6,16 +6,17 @@ import { TransactionForm, type TransactionFormValues } from '@/components/transa
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
-import { colors } from '@/constants/theme';
 import { createTransaction } from '@/db/queries/transaction';
 import { useWalletBalances } from '@/hooks/useWalletBalances';
 import { useSessionStore } from '@/stores/sessionStore';
 import { snackbar } from '@/stores/snackbarStore';
+import { useThemeColors } from '@/stores/themeStore';
 
 /** Records one income or expense. Pushed over the tabs. */
 export default function NewTransactionScreen() {
   const activeUserId = useSessionStore((state) => state.activeUserId);
   const { wallets } = useWalletBalances();
+  const themeColors = useThemeColors();
 
   if (!activeUserId) {
     return <Redirect href="/(auth)/welcome" />;
@@ -46,7 +47,7 @@ export default function NewTransactionScreen() {
           onPress={close}
           className="h-11 w-11 items-center justify-center rounded-full"
         >
-          <Ionicons name="close" size={22} color={colors.inkMuted} />
+          <Ionicons name="close" size={22} color={themeColors.inkMuted} />
         </Pressable>
       </View>
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, Text, type PressableProps } from 'react-native';
 
-import { colors } from '@/constants/theme';
+import { useThemeColors } from '@/stores/themeStore';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'md' | 'lg';
@@ -10,7 +10,7 @@ const CONTAINER: Record<Variant, string> = {
   primary: 'bg-brand',
   secondary: 'border border-line bg-surface',
   ghost: 'bg-transparent',
-  danger: 'bg-expense',
+  danger: 'bg-[#B42318] dark:bg-[#C82B22]',
 };
 
 const LABEL: Record<Variant, string> = {
@@ -18,13 +18,6 @@ const LABEL: Record<Variant, string> = {
   secondary: 'text-ink',
   ghost: 'text-brand',
   danger: 'text-white',
-};
-
-const SPINNER: Record<Variant, string> = {
-  primary: '#FFFFFF',
-  secondary: colors.brand,
-  ghost: colors.brand,
-  danger: '#FFFFFF',
 };
 
 export type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
@@ -46,7 +39,10 @@ export function Button({
   disabled,
   ...rest
 }: ButtonProps) {
+  const themeColors = useThemeColors();
   const isDisabled = disabled === true || loading;
+  const spinnerColor =
+    variant === 'secondary' || variant === 'ghost' ? themeColors.brand : '#FFFFFF';
 
   return (
     <Pressable
@@ -59,7 +55,7 @@ export function Button({
       } ${CONTAINER[variant]} ${fullWidth ? 'w-full' : ''}`}
       style={({ pressed }) => ({ opacity: isDisabled ? 0.5 : pressed ? 0.85 : 1 })}
     >
-      {loading ? <ActivityIndicator size="small" color={SPINNER[variant]} /> : icon}
+      {loading ? <ActivityIndicator size="small" color={spinnerColor} /> : icon}
       <Text className={`text-base font-semibold ${LABEL[variant]}`}>{label}</Text>
     </Pressable>
   );

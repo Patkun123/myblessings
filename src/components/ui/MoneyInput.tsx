@@ -1,7 +1,7 @@
 import { Text, TextInput, View } from 'react-native';
 
-import { colors } from '@/constants/theme';
 import { sanitizeAmountInput } from '@/domain/money';
+import { useThemeColors } from '@/stores/themeStore';
 
 type MoneyInputProps = {
   value: string;
@@ -29,6 +29,8 @@ export function MoneyInput({
   onSubmitEditing,
   testID,
 }: MoneyInputProps) {
+  const themeColors = useThemeColors();
+
   return (
     <View>
       {label ? <Text className="mb-1.5 text-sm font-medium text-ink-muted">{label}</Text> : null}
@@ -45,7 +47,7 @@ export function MoneyInput({
           keyboardType="decimal-pad"
           inputMode="decimal"
           placeholder={placeholder}
-          placeholderTextColor={colors.inkFaint}
+          placeholderTextColor={themeColors.inkFaint}
           autoFocus={autoFocus}
           onSubmitEditing={onSubmitEditing}
           returnKeyType="done"

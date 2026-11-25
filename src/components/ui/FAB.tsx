@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text } from 'react-native';
 
-import { colors } from '@/constants/theme';
+import { useThemeColors } from '@/stores/themeStore';
 import type { IconName } from '@/types/icons';
 
 type FABProps = {
@@ -17,6 +17,8 @@ type FABProps = {
  * container; screens with a tab bar should add bottom padding so it clears it.
  */
 export function FAB({ icon, label, onPress, extended = false }: FABProps) {
+  const themeColors = useThemeColors();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -28,7 +30,7 @@ export function FAB({ icon, label, onPress, extended = false }: FABProps) {
       style={({ pressed }) => ({
         opacity: pressed ? 0.9 : 1,
         transform: [{ scale: pressed ? 0.97 : 1 }],
-        shadowColor: colors.brandDark,
+        shadowColor: themeColors.brandDark,
         shadowOpacity: 0.25,
         shadowRadius: 12,
         shadowOffset: { width: 0, height: 6 },

@@ -4,9 +4,9 @@ import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-na
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { WalletForm, type WalletFormValues } from '@/components/wallet/WalletForm';
-import { colors } from '@/constants/theme';
 import { createWallet } from '@/db/queries/wallet';
 import { useSessionStore } from '@/stores/sessionStore';
+import { useThemeColors } from '@/stores/themeStore';
 
 /**
  * Third onboarding step: the first wallet.
@@ -16,6 +16,7 @@ import { useSessionStore } from '@/stores/sessionStore';
  */
 export default function WalletSetupScreen() {
   const activeUserId = useSessionStore((state) => state.activeUserId);
+  const themeColors = useThemeColors();
 
   if (!activeUserId) {
     return <Redirect href="/(auth)/welcome" />;
@@ -40,7 +41,7 @@ export default function WalletSetupScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View className="h-12 w-12 items-center justify-center rounded-2xl bg-brand-light">
-            <Ionicons name="wallet" size={24} color={colors.brand} />
+            <Ionicons name="wallet" size={24} color={themeColors.brand} />
           </View>
 
           <Text className="mt-5 text-3xl font-bold text-ink">Create your first wallet</Text>

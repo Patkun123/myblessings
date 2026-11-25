@@ -5,9 +5,9 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { AmountText } from '@/components/ui/AmountText';
 import { Sheet } from '@/components/ui/Sheet';
 import { PickerField } from '@/components/transaction/PickerField';
-import { colors } from '@/constants/theme';
 import type { CategoryOption } from '@/db/queries/category';
 import type { WalletBalanceRow } from '@/db/queries/wallet';
+import { useThemeColors } from '@/stores/themeStore';
 import type { IconName } from '@/types/icons';
 
 type WalletPickerProps = {
@@ -19,6 +19,7 @@ type WalletPickerProps = {
 /** Wallet field + sheet list, showing each wallet's current balance. */
 export function WalletPicker({ wallets, value, onChange }: WalletPickerProps) {
   const [open, setOpen] = useState(false);
+  const themeColors = useThemeColors();
   const selected = wallets.find((wallet) => wallet.id === value) ?? null;
 
   return (
@@ -61,7 +62,7 @@ export function WalletPicker({ wallets, value, onChange }: WalletPickerProps) {
                 <AmountText centavos={wallet.balanceCentavos} tone="muted" />
                 {isSelected ? (
                   <View className="ml-2">
-                    <Ionicons name="checkmark-circle" size={20} color={colors.brand} />
+                    <Ionicons name="checkmark-circle" size={20} color={themeColors.brand} />
                   </View>
                 ) : null}
               </Pressable>

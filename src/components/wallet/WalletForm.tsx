@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { MoneyInput } from '@/components/ui/MoneyInput';
 import { WALLET_PRESETS, type WalletPreset } from '@/constants/categories';
-import { colors } from '@/constants/theme';
 import { validateWalletDraft } from '@/domain/wallet';
+import { useThemeColors } from '@/stores/themeStore';
 
 export type WalletFormValues = {
   name: string;
@@ -28,6 +28,7 @@ type WalletFormProps = {
  * Owns its own busy/error state so screens stay thin.
  */
 export function WalletForm({ submitLabel, onSubmit, autoFocus = true }: WalletFormProps) {
+  const themeColors = useThemeColors();
   const [name, setName] = useState('');
   const [openingBalance, setOpeningBalance] = useState('');
   const [preset, setPreset] = useState<WalletPreset>(WALLET_PRESETS[0]);
@@ -106,7 +107,7 @@ export function WalletForm({ submitLabel, onSubmit, autoFocus = true }: WalletFo
                 <Ionicons
                   name={option.icon}
                   size={20}
-                  color={selected ? colors.brand : colors.inkFaint}
+                  color={selected ? themeColors.brand : themeColors.inkFaint}
                 />
                 <Text
                   className={`mt-1 text-xs font-medium ${

@@ -9,7 +9,6 @@ import {
 } from '@/components/transaction/TransactionForm';
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
-import { colors } from '@/constants/theme';
 import {
   restoreTransaction,
   softDeleteTransaction,
@@ -19,6 +18,7 @@ import { useTransaction } from '@/hooks/useTransaction';
 import { useWalletBalances } from '@/hooks/useWalletBalances';
 import { useSessionStore } from '@/stores/sessionStore';
 import { snackbar } from '@/stores/snackbarStore';
+import { useThemeColors } from '@/stores/themeStore';
 
 /** Detail screen: edit an entry, or delete it with an undo window. */
 export default function TransactionDetailScreen() {
@@ -26,6 +26,7 @@ export default function TransactionDetailScreen() {
   const { wallets } = useWalletBalances();
   const { id } = useLocalSearchParams<{ id: string }>();
   const transaction = useTransaction(id);
+  const themeColors = useThemeColors();
 
   if (!activeUserId) {
     return <Redirect href="/(auth)/welcome" />;
@@ -48,7 +49,7 @@ export default function TransactionDetailScreen() {
             onPress={close}
             className="h-11 w-11 items-center justify-center rounded-full"
           >
-            <Ionicons name="close" size={22} color={colors.inkMuted} />
+            <Ionicons name="close" size={22} color={themeColors.inkMuted} />
           </Pressable>
         </View>
         <View className="flex-1 items-center justify-center px-6">
@@ -112,7 +113,7 @@ export default function TransactionDetailScreen() {
           onPress={close}
           className="h-11 w-11 items-center justify-center rounded-full"
         >
-          <Ionicons name="close" size={22} color={colors.inkMuted} />
+          <Ionicons name="close" size={22} color={themeColors.inkMuted} />
         </Pressable>
       </View>
 

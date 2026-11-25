@@ -2,35 +2,34 @@
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
-  // Must not be the Tailwind default ('media'): NativeWind's web runtime calls
-  // colorScheme.set() when the stylesheet registers, and throws outright if the
-  // dark-mode type is 'media'. The app is light-only, so the variant never fires.
-  darkMode: "class",
+  // Must not be 'media': NativeWind's web runtime calls colorScheme.set()
+  // when the stylesheet registers, which requires 'class' mode.
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // Brand — deep teal, calm and trustworthy for money
+        // Brand — deep navy blue, calm and trustworthy for money
         brand: {
-          DEFAULT: '#0E6B57',
-          dark: '#0A4F41',
-          light: '#E6F4F0',
+          DEFAULT: 'rgb(var(--color-brand) / <alpha-value>)',
+          dark: 'rgb(var(--color-brand-dark) / <alpha-value>)',
+          light: 'rgb(var(--color-brand-light) / <alpha-value>)',
         },
         // Accent — subdued gold, used sparingly (church / giving)
         accent: {
-          DEFAULT: '#B58A1B',
-          light: '#FBF3D9',
+          DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
+          light: 'rgb(var(--color-accent-light) / <alpha-value>)',
         },
-        income: '#15803D',
-        expense: '#B42318',
-        warning: '#B54708',
+        income: 'rgb(var(--color-income) / <alpha-value>)',
+        expense: 'rgb(var(--color-expense) / <alpha-value>)',
+        warning: 'rgb(var(--color-warning) / <alpha-value>)',
         ink: {
-          DEFAULT: '#0F1B17',
-          muted: '#5F736C',
-          faint: '#8A9A94',
+          DEFAULT: 'rgb(var(--color-ink) / <alpha-value>)',
+          muted: 'rgb(var(--color-ink-muted) / <alpha-value>)',
+          faint: 'rgb(var(--color-ink-faint) / <alpha-value>)',
         },
-        canvas: '#F6F9F8',
-        surface: '#FFFFFF',
-        line: '#E2EAE6',
+        canvas: 'rgb(var(--color-canvas) / <alpha-value>)',
+        surface: 'rgb(var(--color-surface) / <alpha-value>)',
+        line: 'rgb(var(--color-line) / <alpha-value>)',
       },
       borderRadius: {
         card: '16px',

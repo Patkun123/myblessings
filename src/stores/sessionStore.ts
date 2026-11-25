@@ -6,6 +6,7 @@ import {
   loadActiveUserId,
   saveActiveUserId,
 } from '@/services/sessionStorage';
+import { useSidebarStore } from '@/stores/sidebarStore';
 
 /**
  * Session/UI state only — the ledger is never mirrored here.
@@ -21,7 +22,7 @@ type SessionState = {
   hydrateError: string | null;
   hydrate: () => Promise<void>;
   retryHydrate: () => Promise<void>;
-  setActiveUser: (userId: string) => Promise<void>;
+  setActiveUser: (userId: string, options?: { locked?: boolean }) => Promise<void>;
   clearActiveUser: () => Promise<void>;
   lock: () => void;
   unlock: () => void;
@@ -63,17 +64,19 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     await get().hydrate();
   },
 
-  setActiveUser: async (userId) => {
+  setActiveUser: async (userId, options) => {
     await saveActiveUserId(userId);
-    set({ activeUserId: userId, hydrated: true, locked: false });
+    set({ activeUserId: userId, hydrated: true, locked: options?.locked ?? false });
   },
 
   clearActiveUser: async () => {
+    useSidebarStore.getState().close();
     await forgetActiveUserId();
     set({ activeUserId: null, locked: false });
   },
 
   lock: () => {
+    useSidebarStore.getState().close();
     if (get().activeUserId) set({ locked: true });
   },
 

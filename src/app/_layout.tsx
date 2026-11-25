@@ -1,18 +1,21 @@
 import { migrate } from 'drizzle-orm/expo-sqlite/migrator';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useColorScheme } from 'nativewind';
 import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, AppState, Text, View } from 'react-native';
+import { ActivityIndicator, AppState, Platform, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import '../../global.css';
 import { LockScreen } from '@/components/auth/LockScreen';
 import { Button } from '@/components/ui/Button';
+import { Sidebar } from '@/components/ui/Sidebar';
 import { SnackbarHost } from '@/components/ui/Snackbar';
-import { colors } from '@/constants/theme';
 import { openAppDatabase } from '@/db/client';
+import { loadUserTheme } from '@/db/queries/profile';
 import { useSessionStore } from '@/stores/sessionStore';
+import { useThemeColors, useThemeStore } from '@/stores/themeStore';
 import migrations from '../../drizzle/migrations';
 
 /** Coming back within this window keeps the session unlocked. */
@@ -36,12 +39,19 @@ export default function RootLayout() {
   const [dbState, setDbState] = useState<DbState>({ status: 'loading' });
   const [dbAttempt, setDbAttempt] = useState(0);
 
+  const activeUserId = useSessionStore((state) => state.activeUserId);
   const hydrated = useSessionStore((state) => state.hydrated);
   const locked = useSessionStore((state) => state.locked);
   const hydrateError = useSessionStore((state) => state.hydrateError);
   const hydrate = useSessionStore((state) => state.hydrate);
   const retryHydrate = useSessionStore((state) => state.retryHydrate);
   const lock = useSessionStore((state) => state.lock);
+
+  const themePreference = useThemeStore((state) => state.preference);
+  const setThemePreference = useThemeStore((state) => state.setPreference);
+  const { colorScheme, setColorScheme } = useColorScheme();
+  const themeColors = useThemeColors();
+  const resolvedScheme = colorScheme === 'dark' ? 'dark' : 'light';
 
   /**
    * Open the connection, then migrate. Both steps must finish before any screen
@@ -78,8 +88,59 @@ export default function RootLayout() {
   // unmigrated (or unopened) database.
   const dbReady = dbState.status === 'ready';
   useEffect(() => {
-    if (dbReady) void hydrate();
-  }, [dbReady, hydrate]);
+    if (!dbReady) return;
+    let cancelled = false;
+
+    (async () => {
+      await hydrate();
+      const userId = useSessionStore.getState().activeUserId;
+      if (!cancelled && userId) {
+        try {
+          const theme = await loadUserTheme(userId);
+          if (!cancelled) setThemePreference(theme);
+        } catch (cause) {
+          console.warn('[theme] failed to load user theme', cause);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dbReady, hydrate, setThemePreference]);
+
+  // Keep theme synced when switching or creating profiles after launch.
+  useEffect(() => {
+    if (!dbReady || !activeUserId) return;
+    let cancelled = false;
+
+    loadUserTheme(activeUserId)
+      .then((theme) => {
+        if (!cancelled) setThemePreference(theme);
+      })
+      .catch((cause) => {
+        console.warn('[theme] failed to sync user theme', cause);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dbReady, activeUserId, setThemePreference]);
+
+  useEffect(() => {
+    try {
+      setColorScheme(themePreference);
+    } catch {
+      // Ignore in non-browser environments without window.
+    }
+  }, [themePreference, setColorScheme]);
+
+  // NativeWind's web colorScheme.set('system') strips `.dark`; ensure `<html>` stays synced.
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.documentElement.classList.toggle('dark', resolvedScheme === 'dark');
+    }
+  }, [resolvedScheme]);
 
   const backgroundedAt = useRef<number | null>(null);
   useEffect(() => {
@@ -128,7 +189,7 @@ export default function RootLayout() {
   } else if (!dbReady || !hydrated) {
     content = (
       <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color={colors.brand} />
+        <ActivityIndicator color={themeColors.brand} />
       </View>
     );
   } else if (locked) {
@@ -139,9 +200,10 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: colors.canvas },
+            contentStyle: { backgroundColor: themeColors.canvas },
           }}
         />
+        <Sidebar />
         <SnackbarHost />
       </>
     );
@@ -149,7 +211,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
+      <StatusBar style={resolvedScheme === 'dark' ? 'light' : 'dark'} />
       {content}
     </SafeAreaProvider>
   );

@@ -2,16 +2,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
 
-import { colors } from '@/constants/theme';
 import { useSessionStore } from '@/stores/sessionStore';
+import { useThemeColors } from '@/stores/themeStore';
 
 /** Tab tint arrives as ColorValue; our tokens are always strings. */
-function resolveColor(color: ColorValue): string {
-  return typeof color === 'string' ? color : colors.inkFaint;
+function resolveColor(color: ColorValue, fallback: string): string {
+  return typeof color === 'string' ? color : fallback;
 }
 
 export default function TabsLayout() {
   const activeUserId = useSessionStore((state) => state.activeUserId);
+  const themeColors = useThemeColors();
 
   if (!activeUserId) {
     return <Redirect href="/(auth)/welcome" />;
@@ -21,9 +22,9 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.brand,
-        tabBarInactiveTintColor: colors.inkFaint,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.line },
+        tabBarActiveTintColor: themeColors.brand,
+        tabBarInactiveTintColor: themeColors.inkFaint,
+        tabBarStyle: { backgroundColor: themeColors.surface, borderTopColor: themeColors.line },
         tabBarLabelStyle: { fontSize: 11 },
       }}
     >
@@ -32,7 +33,11 @@ export default function TabsLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={resolveColor(color)} />
+            <Ionicons
+              name="home-outline"
+              size={size}
+              color={resolveColor(color, themeColors.inkFaint)}
+            />
           ),
         }}
       />
@@ -41,7 +46,11 @@ export default function TabsLayout() {
         options={{
           title: 'Transactions',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="swap-vertical-outline" size={size} color={resolveColor(color)} />
+            <Ionicons
+              name="swap-vertical-outline"
+              size={size}
+              color={resolveColor(color, themeColors.inkFaint)}
+            />
           ),
         }}
       />
@@ -50,7 +59,11 @@ export default function TabsLayout() {
         options={{
           title: 'Wallets',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="wallet-outline" size={size} color={resolveColor(color)} />
+            <Ionicons
+              name="wallet-outline"
+              size={size}
+              color={resolveColor(color, themeColors.inkFaint)}
+            />
           ),
         }}
       />
@@ -59,7 +72,11 @@ export default function TabsLayout() {
         options={{
           title: 'Budgets',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="pie-chart-outline" size={size} color={resolveColor(color)} />
+            <Ionicons
+              name="pie-chart-outline"
+              size={size}
+              color={resolveColor(color, themeColors.inkFaint)}
+            />
           ),
         }}
       />
@@ -68,7 +85,11 @@ export default function TabsLayout() {
         options={{
           title: 'Reports',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="document-text-outline" size={size} color={resolveColor(color)} />
+            <Ionicons
+              name="document-text-outline"
+              size={size}
+              color={resolveColor(color, themeColors.inkFaint)}
+            />
           ),
         }}
       />

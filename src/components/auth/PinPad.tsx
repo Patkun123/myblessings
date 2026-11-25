@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 
-import { colors, HIT_SLOP } from '@/constants/theme';
+import { HIT_SLOP } from '@/constants/theme';
+import { useThemeColors } from '@/stores/themeStore';
 
 type PinPadProps = {
   value: string;
@@ -14,6 +15,8 @@ const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
 
 /** Digits-only keypad. No native keyboard, so no autofill or clipboard leak. */
 export function PinPad({ value, onChange, maxLength, disabled = false }: PinPadProps) {
+  const themeColors = useThemeColors();
+
   function append(digit: string) {
     if (disabled || value.length >= maxLength) return;
     onChange(value + digit);
@@ -66,7 +69,7 @@ export function PinPad({ value, onChange, maxLength, disabled = false }: PinPadP
             className="h-16 w-16 items-center justify-center rounded-full"
             style={({ pressed }) => ({ opacity: disabled ? 0.3 : pressed ? 0.6 : 1 })}
           >
-            <Ionicons name="backspace-outline" size={24} color={colors.inkMuted} />
+            <Ionicons name="backspace-outline" size={24} color={themeColors.inkMuted} />
           </Pressable>
         </View>
       </View>

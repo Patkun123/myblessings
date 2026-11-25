@@ -4,13 +4,14 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } fro
 
 import { Screen } from '@/components/ui/Screen';
 import { WalletForm, type WalletFormValues } from '@/components/wallet/WalletForm';
-import { colors } from '@/constants/theme';
 import { createWallet } from '@/db/queries/wallet';
 import { useSessionStore } from '@/stores/sessionStore';
+import { useThemeColors } from '@/stores/themeStore';
 
 /** Adds another wallet after onboarding. Pushed over the tabs. */
 export default function NewWalletScreen() {
   const activeUserId = useSessionStore((state) => state.activeUserId);
+  const themeColors = useThemeColors();
 
   if (!activeUserId) {
     return <Redirect href="/(auth)/welcome" />;
@@ -34,7 +35,7 @@ export default function NewWalletScreen() {
           onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/wallets'))}
           className="h-11 w-11 items-center justify-center rounded-full"
         >
-          <Ionicons name="close" size={22} color={colors.inkMuted} />
+          <Ionicons name="close" size={22} color={themeColors.inkMuted} />
         </Pressable>
       </View>
 

@@ -5,7 +5,6 @@ import { CategoryPicker, WalletPicker } from '@/components/transaction/Transacti
 import { TypeToggle } from '@/components/transaction/TypeToggle';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { colors } from '@/constants/theme';
 import type { WalletBalanceRow } from '@/db/queries/wallet';
 import { sanitizeAmountInput, toDecimalString } from '@/domain/money';
 import {
@@ -15,6 +14,7 @@ import {
   type TransactionKind,
 } from '@/domain/transaction';
 import { useCategories } from '@/hooks/useCategories';
+import { useThemeColors } from '@/stores/themeStore';
 import { todayCalendarDate, yesterdayCalendarDate } from '@/utils/date';
 
 export type TransactionFormValues = {
@@ -84,6 +84,7 @@ export function TransactionForm({
   onSubmit,
   onDelete,
 }: TransactionFormProps) {
+  const themeColors = useThemeColors();
   const today = todayCalendarDate();
   const yesterday = yesterdayCalendarDate();
 
@@ -159,7 +160,7 @@ export function TransactionForm({
             clearError();
           }}
           placeholder="0.00"
-          placeholderTextColor={colors.inkFaint}
+          placeholderTextColor={themeColors.inkFaint}
           keyboardType="decimal-pad"
           autoFocus={!initial}
           accessibilityLabel="Amount"

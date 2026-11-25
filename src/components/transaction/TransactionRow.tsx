@@ -3,9 +3,9 @@ import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
 import { AmountText } from '@/components/ui/AmountText';
-import { colors } from '@/constants/theme';
 import type { TransactionWithMeta } from '@/db/queries/transaction';
 import { signedCentavos } from '@/domain/transaction';
+import { useThemeColors } from '@/stores/themeStore';
 import type { IconName } from '@/types/icons';
 import { calendarDateLabel } from '@/utils/date';
 
@@ -18,8 +18,9 @@ type TransactionRowProps = {
  * amount. Tapping opens the detail screen.
  */
 export function TransactionRow({ transaction }: TransactionRowProps) {
+  const themeColors = useThemeColors();
   const income = transaction.type === 'income';
-  const color = transaction.categoryColor ?? colors.inkFaint;
+  const color = transaction.categoryColor ?? themeColors.inkFaint;
   const icon = (transaction.categoryIcon ?? 'pricetag') as IconName;
   const title =
     transaction.description ?? transaction.categoryName ?? (income ? 'Income' : 'Expense');

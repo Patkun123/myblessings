@@ -12,11 +12,11 @@ import { Screen } from '@/components/ui/Screen';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Sheet } from '@/components/ui/Sheet';
 import { TransactionRow } from '@/components/transaction/TransactionRow';
-import { colors } from '@/constants/theme';
 import type { TransactionWithMeta } from '@/db/queries/transaction';
 import { signedCentavos, type TransactionKind } from '@/domain/transaction';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useWalletBalances } from '@/hooks/useWalletBalances';
+import { useThemeColors } from '@/stores/themeStore';
 import type { IconName } from '@/types/icons';
 import { dayHeading } from '@/utils/date';
 
@@ -57,6 +57,7 @@ function groupByDay(rows: TransactionWithMeta[]): ListItem[] {
 }
 
 export default function TransactionsScreen() {
+  const themeColors = useThemeColors();
   const { wallets } = useWalletBalances();
   const [search, setSearch] = useState('');
   const [type, setType] = useState<TypeFilter>('all');
@@ -125,7 +126,7 @@ export default function TransactionsScreen() {
             <Ionicons
               name="wallet-outline"
               size={13}
-              color={walletId ? colors.brand : colors.inkMuted}
+              color={walletId ? themeColors.brand : themeColors.inkMuted}
             />
             <Text
               className={`ml-1 max-w-[110px] text-xs font-semibold ${
@@ -138,7 +139,7 @@ export default function TransactionsScreen() {
             <Ionicons
               name="chevron-down"
               size={13}
-              color={walletId ? colors.brand : colors.inkMuted}
+              color={walletId ? themeColors.brand : themeColors.inkMuted}
             />
           </Pressable>
         </View>
@@ -212,11 +213,11 @@ export default function TransactionsScreen() {
             className="flex-row items-center border-b border-line py-3"
           >
             <View className="h-10 w-10 items-center justify-center rounded-full bg-canvas">
-              <Ionicons name="wallet-outline" size={18} color={colors.inkMuted} />
+              <Ionicons name="wallet-outline" size={18} color={themeColors.inkMuted} />
             </View>
             <Text className="ml-3 flex-1 text-base text-ink">All wallets</Text>
             {walletId === null ? (
-              <Ionicons name="checkmark-circle" size={20} color={colors.brand} />
+              <Ionicons name="checkmark-circle" size={20} color={themeColors.brand} />
             ) : null}
           </Pressable>
 
@@ -245,7 +246,7 @@ export default function TransactionsScreen() {
                 <AmountText centavos={wallet.balanceCentavos} tone="muted" />
                 {selected ? (
                   <View className="ml-2">
-                    <Ionicons name="checkmark-circle" size={20} color={colors.brand} />
+                    <Ionicons name="checkmark-circle" size={20} color={themeColors.brand} />
                   </View>
                 ) : null}
               </Pressable>

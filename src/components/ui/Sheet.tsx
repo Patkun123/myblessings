@@ -23,7 +23,7 @@ export function Sheet({ visible, onClose, title, children, footer }: SheetProps)
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <View className="flex-1 justify-end bg-black/40">
+      <View className="flex-1 justify-end bg-black/40 dark:bg-black/60">
         <Pressable
           className="absolute inset-0"
           accessibilityRole="button"
@@ -31,7 +31,7 @@ export function Sheet({ visible, onClose, title, children, footer }: SheetProps)
           onPress={onClose}
         />
         <View
-          className="rounded-t-3xl bg-surface px-5 pt-3"
+          className="rounded-t-3xl border-t border-line bg-surface px-5 pt-3"
           style={{ paddingBottom: Math.max(insets.bottom, 16) }}
         >
           <View className="mb-3 h-1 w-10 self-center rounded-full bg-line" />
