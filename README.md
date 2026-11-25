@@ -39,19 +39,27 @@ npx expo-doctor             # dependency / config health check
 
 ### Web preview
 
-`npx expo start --web` works for UI work. Two things make that possible and must not be
-removed:
+`npx expo start --web` runs the app in a browser for UI work. Web is a **preview target
+only** — the app ships to Android and iOS, and nothing stored in a browser is encrypted.
+Three things make it work and must not be removed:
 
-- `metro.config.js` adds `wasm` to `assetExts` and serves `Cross-Origin-Embedder-Policy:
+- `metro.config.js` adds `wasm` to `assetExts` and sets `Cross-Origin-Embedder-Policy:
   credentialless` + `Cross-Origin-Opener-Policy: same-origin`. `expo-sqlite` runs SQLite in a
   Web Worker and Drizzle's Expo driver is synchronous, so results come back through a
-  `SharedArrayBuffer`, which browsers only expose to cross-origin-isolated pages.
+  `SharedArrayBuffer`, which browsers only expose to cross-origin-isolated pages. The same two
+  headers are also patched onto `ServerResponse.writeHead`, because the Expo CLI answers the
+  root document (`GET /`) from its manifest middleware, *before* Metro's middleware — so
+  `enhanceMiddleware` alone never covers it, and a first load of `/` would fail with
+  *"SharedArrayBuffer is not defined"*.
 - `src/db/client.ts` opens the database with `await SQLite.openDatabaseAsync()` before creating
-  the Drizzle client. Opening at module scope throws *"The SQLite web worker has not finished
-  loading"*.
+  the Drizzle client, and the root layout migrates only after that. Opening at module scope
+  throws *"The SQLite web worker has not finished loading"*.
+- `src/services/secureStore.web.ts` backs the PIN verifier and active-profile id with
+  `localStorage`, because `expo-secure-store` ships an empty stub for web
+  (`ExpoSecureStore.web.js` exports `{}`). That copy is not encrypted — use web to look at the
+  UI, not to keep real books.
 
-Static web hosting needs those two headers configured on the server; `enhanceMiddleware` only
-covers the dev server.
+A static deploy needs the COOP/COEP headers in the host configuration too.
 
 ## Project layout
 

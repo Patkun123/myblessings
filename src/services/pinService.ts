@@ -1,5 +1,5 @@
 import * as Crypto from 'expo-crypto';
-import * as SecureStore from 'expo-secure-store';
+import { deleteItemAsync, getItemAsync, setItemAsync } from '@/services/secureStore';
 
 /**
  * PIN storage.
@@ -79,7 +79,7 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 async function readRecord(userId: string): Promise<PinRecord | null> {
-  const raw = await SecureStore.getItemAsync(pinKey(userId));
+  const raw = await getItemAsync(pinKey(userId));
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as PinRecord;
@@ -90,7 +90,7 @@ async function readRecord(userId: string): Promise<PinRecord | null> {
 }
 
 async function readAttempts(userId: string): Promise<AttemptRecord> {
-  const raw = await SecureStore.getItemAsync(attemptsKey(userId));
+  const raw = await getItemAsync(attemptsKey(userId));
   if (!raw) return { failed: 0, lockedUntil: null };
   try {
     const parsed = JSON.parse(raw) as AttemptRecord;
@@ -101,7 +101,7 @@ async function readAttempts(userId: string): Promise<AttemptRecord> {
 }
 
 async function writeAttempts(userId: string, attempts: AttemptRecord): Promise<void> {
-  await SecureStore.setItemAsync(attemptsKey(userId), JSON.stringify(attempts));
+  await setItemAsync(attemptsKey(userId), JSON.stringify(attempts));
 }
 
 export async function hasPin(userId: string): Promise<boolean> {
@@ -122,8 +122,8 @@ export async function setPin(userId: string, pin: string): Promise<void> {
     hash: await hashPin(pin, salt, DEFAULT_ITERATIONS),
   };
 
-  await SecureStore.setItemAsync(pinKey(userId), JSON.stringify(record));
-  await SecureStore.deleteItemAsync(attemptsKey(userId));
+  await setItemAsync(pinKey(userId), JSON.stringify(record));
+  await deleteItemAsync(attemptsKey(userId));
 }
 
 export type VerifyResult =
@@ -166,6 +166,6 @@ export async function lockoutRemainingMs(userId: string): Promise<number> {
 
 /** Removes the PIN entirely (Phase 2 "turn off app lock" flow). */
 export async function clearPin(userId: string): Promise<void> {
-  await SecureStore.deleteItemAsync(pinKey(userId));
-  await SecureStore.deleteItemAsync(attemptsKey(userId));
+  await deleteItemAsync(pinKey(userId));
+  await deleteItemAsync(attemptsKey(userId));
 }

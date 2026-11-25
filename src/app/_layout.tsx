@@ -18,6 +18,18 @@ import migrations from '../../drizzle/migrations';
 /** Coming back within this window keeps the session unlocked. */
 const RELOCK_AFTER_MS = 60_000;
 
+/** Flattens Drizzle's `cause` chain into one readable message. */
+function describeError(error: unknown): string {
+  const parts: string[] = [];
+  let current: unknown = error;
+  for (let depth = 0; current instanceof Error && depth < 4; depth += 1) {
+    const text = current.message.trim();
+    if (text && !parts.includes(text)) parts.push(text);
+    current = (current as { cause?: unknown }).cause;
+  }
+  return parts.join('\n\n') || 'Could not open the database.';
+}
+
 type DbState = { status: 'loading' } | { status: 'ready' } | { status: 'error'; message: string };
 
 export default function RootLayout() {
@@ -45,10 +57,13 @@ export default function RootLayout() {
         await migrate(database, migrations);
         if (!cancelled) setDbState({ status: 'ready' });
       } catch (cause) {
+        // Drizzle wraps driver errors, so the useful SQLite message lives on
+        // `cause`. Log the whole chain for debugging; show it plus the wrapper.
+        console.error('[db] open/migrate failed', cause);
         if (!cancelled) {
           setDbState({
             status: 'error',
-            message: cause instanceof Error ? cause.message : 'Could not open the database.',
+            message: describeError(cause),
           });
         }
       }

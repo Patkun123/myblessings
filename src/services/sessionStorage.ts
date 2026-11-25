@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import { deleteItemAsync, getItemAsync, setItemAsync } from '@/services/secureStore';
 
 /**
  * Remembers which profile was last active so a re-launch lands on the lock
@@ -9,13 +9,13 @@ import * as SecureStore from 'expo-secure-store';
 const ACTIVE_USER_KEY = 'myblessings.activeUserId';
 
 export async function loadActiveUserId(): Promise<string | null> {
-  return SecureStore.getItemAsync(ACTIVE_USER_KEY);
+  return getItemAsync(ACTIVE_USER_KEY);
 }
 
 export async function saveActiveUserId(userId: string): Promise<void> {
-  await SecureStore.setItemAsync(ACTIVE_USER_KEY, userId);
+  await setItemAsync(ACTIVE_USER_KEY, userId);
 }
 
 export async function forgetActiveUserId(): Promise<void> {
-  await SecureStore.deleteItemAsync(ACTIVE_USER_KEY);
+  await deleteItemAsync(ACTIVE_USER_KEY);
 }
