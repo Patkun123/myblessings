@@ -108,11 +108,11 @@ export function LockScreen() {
     <SafeAreaView className="flex-1 bg-canvas">
       <View className="flex-1 justify-between px-6 pb-8 pt-14">
         <View className="items-center">
-          <View className="h-14 w-14 items-center justify-center rounded-2xl bg-brand">
-            <Text className="text-2xl font-bold text-white">₱</Text>
+          <View className="h-14 w-14 items-center justify-center rounded-pane bg-brand">
+            <Text className="font-body-bold text-2xl text-brand-ink">₱</Text>
           </View>
-          <Text className="mt-5 text-2xl font-bold text-ink">Enter your PIN</Text>
-          <Text className="mt-1.5 text-sm text-ink-muted">
+          <Text className="mt-5 font-body-bold text-2xl text-ink">Enter your PIN</Text>
+          <Text className="mt-1.5 font-body text-sm text-ink-muted">
             {isLockedOut
               ? `Locked for ${remainingSeconds}s`
               : 'Unlock MyBlessings to continue.'}

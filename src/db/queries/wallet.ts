@@ -1,8 +1,14 @@
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 
 import { getDb } from '@/db/client';
-import { liveTransactionCountSql, signedAmountSql } from '@/db/queries/ledger';
+import {
+  expenseSumSql,
+  incomeSumSql,
+  liveTransactionCountSql,
+  signedAmountSql,
+} from '@/db/queries/ledger';
 import { transaction, wallet } from '@/db/schema';
+import { utcTimestamp } from '@/utils/date';
 import { newId } from '@/utils/id';
 
 export type WalletBalanceRow = {
@@ -11,8 +17,11 @@ export type WalletBalanceRow = {
   icon: string;
   color: string;
   openingBalanceCentavos: number;
+  incomeCentavos: number;
+  expenseCentavos: number;
   balanceCentavos: number;
   transactionCount: number;
+  lastOccurredOn: string | null;
 };
 
 /**
@@ -28,8 +37,11 @@ export function walletBalancesQuery(userId: string) {
       icon: wallet.icon,
       color: wallet.color,
       openingBalanceCentavos: wallet.openingBalanceCentavos,
+      incomeCentavos: incomeSumSql,
+      expenseCentavos: expenseSumSql,
       balanceCentavos: sql<number>`${wallet.openingBalanceCentavos} + ${signedAmountSql}`,
       transactionCount: liveTransactionCountSql,
+      lastOccurredOn: sql<string | null>`MAX(${transaction.occurredOn})`,
     })
     .from(wallet)
     .leftJoin(
@@ -100,4 +112,104 @@ export async function countActiveWallets(userId: string): Promise<number> {
     .where(and(eq(wallet.userId, userId), eq(wallet.isArchived, false), isNull(wallet.deletedAt)));
 
   return row?.count ?? 0;
+}
+
+export type WalletUpdateInput = {
+  userId: string;
+  name: string;
+  icon: string;
+  color: string;
+  openingBalanceCentavos: number;
+};
+
+/** Updates an active wallet's metadata and opening balance. */
+export async function updateWallet(id: string, input: WalletUpdateInput): Promise<void> {
+  await getDb()
+    .update(wallet)
+    .set({
+      name: input.name,
+      icon: input.icon,
+      color: input.color,
+      openingBalanceCentavos: input.openingBalanceCentavos,
+      updatedAt: utcTimestamp(),
+    })
+    .where(
+      and(
+        eq(wallet.id, id),
+        eq(wallet.userId, input.userId),
+        isNull(wallet.deletedAt)
+      )
+    );
+}
+
+/**
+ * Soft-deletes a wallet and its currently live transactions in one atomic batch.
+ * Blocks deletion when it is the user's sole active wallet so the ledger is
+ * never stranded without a destination. Returns deleted transaction IDs so
+ * Undo restores only rows deleted by this action.
+ */
+export async function softDeleteWalletWithTransactions(
+  userId: string,
+  id: string
+): Promise<{ deletedTransactionIds: string[] }> {
+  const activeCount = await countActiveWallets(userId);
+  if (activeCount <= 1) {
+    throw new Error('Keep at least one wallet to record transactions.');
+  }
+
+  const database = getDb();
+  const now = utcTimestamp();
+
+  return database.transaction(async (tx) => {
+    const liveTxRows = await tx
+      .select({ id: transaction.id })
+      .from(transaction)
+      .where(
+        and(
+          eq(transaction.userId, userId),
+          eq(transaction.walletId, id),
+          isNull(transaction.deletedAt)
+        )
+      );
+
+    const deletedTransactionIds = liveTxRows.map((row) => row.id);
+
+    if (deletedTransactionIds.length > 0) {
+      await tx
+        .update(transaction)
+        .set({ deletedAt: now, updatedAt: now })
+        .where(and(eq(transaction.userId, userId), inArray(transaction.id, deletedTransactionIds)));
+    }
+
+    await tx
+      .update(wallet)
+      .set({ deletedAt: now, updatedAt: now })
+      .where(and(eq(wallet.id, id), eq(wallet.userId, userId), isNull(wallet.deletedAt)));
+
+    return { deletedTransactionIds };
+  });
+}
+
+/** Restores a soft-deleted wallet and the exact transactions deleted with it. */
+export async function restoreWalletWithTransactions(
+  userId: string,
+  id: string,
+  transactionIds: readonly string[]
+): Promise<void> {
+  const database = getDb();
+  const now = utcTimestamp();
+
+  await database.transaction(async (tx) => {
+    await tx
+      .update(wallet)
+      .set({ deletedAt: null, updatedAt: now })
+      .where(and(eq(wallet.id, id), eq(wallet.userId, userId)));
+
+    if (transactionIds.length > 0) {
+      await tx
+        .update(transaction)
+        .set({ deletedAt: null, updatedAt: now })
+        .where(and(eq(transaction.userId, userId), inArray(transaction.id, [...transactionIds])));
+    }
+  });
 }

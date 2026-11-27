@@ -1,11 +1,12 @@
-import { and, desc, eq, gte, isNull, like, lte, or, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, isNull, like, lt, lte, or, sql, type SQL } from 'drizzle-orm';
 
 import { getDb } from '@/db/client';
-import { expenseSumSql, incomeSumSql } from '@/db/queries/ledger';
+import { expenseSumSql, incomeSumSql, signedAmountSql } from '@/db/queries/ledger';
 import {
   category,
   transaction,
   wallet,
+  type CategoryType,
   type TransactionType,
 } from '@/db/schema';
 import type { TransactionKind } from '@/domain/transaction';
@@ -132,6 +133,95 @@ export function rangeTotalsQuery(userId: string, start: string, end: string) {
         lte(transaction.occurredOn, end)
       )
     );
+}
+
+/**
+ * Per-wallet balance strictly before `beforeDate` (`occurred_on < beforeDate`),
+ * grouped by wallet so `opening_balance_centavos` is never multiplied across joins.
+ */
+export function walletBalancesBeforeDateQuery(userId: string, beforeDate: string) {
+  return getDb()
+    .select({
+      walletId: wallet.id,
+      balanceCentavos: sql<number>`${wallet.openingBalanceCentavos} + ${signedAmountSql}`,
+    })
+    .from(wallet)
+    .leftJoin(
+      transaction,
+      and(
+        eq(transaction.walletId, wallet.id),
+        isNull(transaction.deletedAt),
+        lt(transaction.occurredOn, beforeDate)
+      )
+    )
+    .where(and(eq(wallet.userId, userId), eq(wallet.isArchived, false), isNull(wallet.deletedAt)))
+    .groupBy(wallet.id);
+}
+
+/**
+ * Daily income, expense, and net ledger movement across active wallets in `[start, end]`.
+ * Transfers between active wallets net to 0 in `netLedgerCentavos` and are excluded
+ * from `incomeCentavos` / `expenseCentavos`.
+ */
+export function dailyTrendTotalsQuery(userId: string, start: string, end: string) {
+  return getDb()
+    .select({
+      occurredOn: transaction.occurredOn,
+      incomeCentavos: incomeSumSql,
+      expenseCentavos: expenseSumSql,
+      netLedgerCentavos: signedAmountSql,
+    })
+    .from(transaction)
+    .innerJoin(wallet, eq(wallet.id, transaction.walletId))
+    .where(
+      and(
+        eq(transaction.userId, userId),
+        isNull(transaction.deletedAt),
+        eq(wallet.isArchived, false),
+        isNull(wallet.deletedAt),
+        gte(transaction.occurredOn, start),
+        lte(transaction.occurredOn, end)
+      )
+    )
+    .groupBy(transaction.occurredOn)
+    .orderBy(asc(transaction.occurredOn));
+}
+
+/**
+ * Category totals for an inclusive date range and type (`income` or `expense`),
+ * scoped to active wallets and ignoring soft-deleted rows and transfers.
+ */
+export function categoryTotalsQuery(
+  userId: string,
+  start: string,
+  end: string,
+  type: CategoryType
+) {
+  const totalExpr = sql<number>`COALESCE(SUM(${transaction.amountCentavos}), 0)`;
+
+  return getDb()
+    .select({
+      categoryId: transaction.categoryId,
+      categoryName: category.name,
+      categoryColor: category.color,
+      totalCentavos: totalExpr,
+    })
+    .from(transaction)
+    .innerJoin(wallet, eq(wallet.id, transaction.walletId))
+    .leftJoin(category, eq(category.id, transaction.categoryId))
+    .where(
+      and(
+        eq(transaction.userId, userId),
+        isNull(transaction.deletedAt),
+        eq(wallet.isArchived, false),
+        isNull(wallet.deletedAt),
+        eq(transaction.type, type),
+        gte(transaction.occurredOn, start),
+        lte(transaction.occurredOn, end)
+      )
+    )
+    .groupBy(transaction.categoryId)
+    .orderBy(desc(totalExpr));
 }
 
 export type TransactionWriteInput = {

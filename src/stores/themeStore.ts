@@ -18,7 +18,7 @@ export function applyNativeWindTheme(preference: ThemePreference): void {
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  preference: 'light',
+  preference: 'dark',
   setPreference: (preference) => {
     applyNativeWindTheme(preference);
     set({ preference });
@@ -28,5 +28,5 @@ export const useThemeStore = create<ThemeState>((set) => ({
 /** Reactive theme palette matching NativeWind's resolved light/dark scheme. */
 export function useThemeColors(): ThemeColors {
   const { colorScheme: activeScheme } = useColorScheme();
-  return getThemeColors(activeScheme === 'dark' ? 'dark' : 'light');
+  return getThemeColors(activeScheme === 'light' ? 'light' : 'dark');
 }

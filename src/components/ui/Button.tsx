@@ -7,17 +7,17 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'md' | 'lg';
 
 const CONTAINER: Record<Variant, string> = {
-  primary: 'bg-brand',
+  primary: 'bg-brand border border-brand',
   secondary: 'border border-line bg-surface',
   ghost: 'bg-transparent',
-  danger: 'bg-[#B42318] dark:bg-[#C82B22]',
+  danger: 'bg-expense border border-expense',
 };
 
 const LABEL: Record<Variant, string> = {
-  primary: 'text-white',
+  primary: 'text-brand-ink',
   secondary: 'text-ink',
   ghost: 'text-brand',
-  danger: 'text-white',
+  danger: 'text-brand-ink',
 };
 
 export type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
@@ -42,7 +42,7 @@ export function Button({
   const themeColors = useThemeColors();
   const isDisabled = disabled === true || loading;
   const spinnerColor =
-    variant === 'secondary' || variant === 'ghost' ? themeColors.brand : '#FFFFFF';
+    variant === 'secondary' || variant === 'ghost' ? themeColors.brand : themeColors.brandInk;
 
   return (
     <Pressable
@@ -50,13 +50,13 @@ export function Button({
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       {...rest}
       disabled={isDisabled}
-      className={`flex-row items-center justify-center gap-2 rounded-xl ${
+      className={`flex-row items-center justify-center gap-2 rounded-pane ${
         size === 'lg' ? 'h-14 px-6' : 'h-12 px-5'
-      } ${CONTAINER[variant]} ${fullWidth ? 'w-full' : ''}`}
-      style={({ pressed }) => ({ opacity: isDisabled ? 0.5 : pressed ? 0.85 : 1 })}
+      } ${CONTAINER[variant]} ${isDisabled ? 'border-dashed' : ''} ${fullWidth ? 'w-full' : ''}`}
+      style={({ pressed }) => ({ opacity: isDisabled ? 0.48 : pressed ? 0.86 : 1 })}
     >
       {loading ? <ActivityIndicator size="small" color={spinnerColor} /> : icon}
-      <Text className={`text-base font-semibold ${LABEL[variant]}`}>{label}</Text>
+      <Text className={`font-body-semibold text-base ${LABEL[variant]}`}>{label}</Text>
     </Pressable>
   );
 }

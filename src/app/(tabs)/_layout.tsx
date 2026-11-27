@@ -24,8 +24,14 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: themeColors.brand,
         tabBarInactiveTintColor: themeColors.inkFaint,
-        tabBarStyle: { backgroundColor: themeColors.surface, borderTopColor: themeColors.line },
-        tabBarLabelStyle: { fontSize: 11 },
+        tabBarStyle: {
+          backgroundColor: themeColors.surface,
+          borderTopColor: themeColors.line,
+        },
+        tabBarLabelStyle: {
+          fontFamily: 'Archivo_600SemiBold',
+          fontSize: 11,
+        },
       }}
     >
       <Tabs.Screen

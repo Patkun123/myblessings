@@ -105,7 +105,7 @@ export default function TransactionDetailScreen() {
   return (
     <Screen appHeader={false}>
       <View className="flex-row items-center justify-between pb-4 pt-3">
-        <Text className="text-2xl font-bold text-ink">Transaction</Text>
+        <Text className="font-body-bold text-2xl text-ink">Transaction</Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Close"

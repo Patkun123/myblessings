@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-26T21:10:00.000Z",
+  "title": "Design System: MyBlessings — The Capiz Window",
+  "extensions": {
+    "colorMeta": {
+      "frame-dark": {
+        "role": "neutral",
+        "displayName": "Dark Hardwood Frame",
+        "canonical": "#1C1613",
+        "tonalRamp": ["#110D0B", "#1C1613", "#2A211B", "#3B2F26", "#5F5449", "#8A7C6C", "#B9B0A2", "#F4ECDD"]
+      },
+      "ground-dark": {
+        "role": "neutral",
+        "displayName": "Room Ground",
+        "canonical": "#221A15",
+        "tonalRamp": ["#15100D", "#221A15", "#2F241D", "#43352B", "#68594C", "#8E7E70", "#BEB4A6", "#FBF6EC"]
+      },
+      "pane-dark": {
+        "role": "neutral",
+        "displayName": "Capiz Pane",
+        "canonical": "#2A211B",
+        "tonalRamp": ["#1A1410", "#2A211B", "#3A2E25", "#4E3F33", "#716052", "#968576", "#C7BCAE", "#F1E6D2"]
+      },
+      "lamplight": {
+        "role": "primary",
+        "displayName": "Lamplight Amber",
+        "canonical": "#E9A94A",
+        "tonalRamp": ["#3A250A", "#6B400C", "#8A5410", "#C2872E", "#E9A94A", "#F0BE70", "#F5D7A4", "#FBF6EC"]
+      },
+      "capiz-ivory": {
+        "role": "neutral",
+        "displayName": "Capiz Ivory",
+        "canonical": "#F4ECDD",
+        "tonalRamp": ["#241C16", "#46382D", "#6C5B4D", "#928172", "#B5A596", "#D9C9AC", "#F4ECDD", "#FBF6EC"]
+      },
+      "growth-dark": {
+        "role": "semantic",
+        "displayName": "Sage Growth",
+        "canonical": "#6FA98A",
+        "tonalRamp": ["#173527", "#23503B", "#2F6B4F", "#4B8B6B", "#6FA98A", "#93C1A8", "#BBDACA", "#E6F3EC"]
+      },
+      "spend-dark": {
+        "role": "semantic",
+        "displayName": "Terracotta Spend",
+        "canonical": "#D07A63",
+        "tonalRamp": ["#4A1A10", "#762B1B", "#A8412B", "#BE5D47", "#D07A63", "#DF9C8A", "#EDC0B4", "#FAECE8"]
+      }
+    },
+    "typographyMeta": {
+      "monumental": { "displayName": "Monumental Total", "purpose": "Sole 34px total balance inside the Capiz Window transom." },
+      "title": { "displayName": "Screen Title", "purpose": "Stack, onboarding, and tab header titles." },
+      "heading": { "displayName": "Heading / Ledger Primary", "purpose": "Brand bar, section headers, and list row titles." },
+      "body": { "displayName": "Body", "purpose": "Form fields, descriptions, and empty-state guidance." },
+      "label": { "displayName": "Tracked Label", "purpose": "Uppercase tracked metadata such as ALL WALLETS, IN/OUT/NET, and ADD WALLET." }
+    },
+    "shadows": [
+      {
+        "name": "fab-lift",
+        "value": "0 5px 10px rgba(28, 22, 19, 0.32)",
+        "purpose": "Subtle lift under the primary lamplight floating action button."
+      }
+    ],
+    "motion": [
+      {
+        "name": "lamplight-ramp",
+        "value": "320ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Exponential ease-out animation for proportional lamplight height inside each wallet pane."
+      }
+    ],
+    "breakpoints": [
+      { "name": "phone", "value": "390px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action button using Lamplight Amber with high-contrast Hardwood ink.",
+      "html": "<button class=\"ds-btn-primary\">Save transaction</button>",
+      "css": ".ds-btn-primary { background: #E9A94A; color: #241C16; border: 1px solid #E9A94A; border-radius: 12px; height: 48px; padding: 0 20px; font-family: Archivo, sans-serif; font-weight: 600; font-size: 16px; cursor: pointer; transition: opacity 0.16s ease; } .ds-btn-primary:hover { opacity: 0.92; } .ds-btn-primary:focus-visible { outline: 2px solid #E9A94A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary action button on Room Ground with a 1px muntin border.",
+      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { background: #221A15; color: #F4ECDD; border: 1px solid #3B2F26; border-radius: 12px; height: 48px; padding: 0 20px; font-family: Archivo, sans-serif; font-weight: 600; font-size: 16px; cursor: pointer; transition: border-color 0.16s ease; } .ds-btn-secondary:hover { border-color: #E9A94A; } .ds-btn-secondary:focus-visible { outline: 2px solid #E9A94A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text & Money Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "56px form input in Room Ground with 1px muntin border and lamplight caret.",
+      "html": "<input class=\"ds-input\" placeholder=\"Cash, GCash, Grace Church\" />",
+      "css": ".ds-input { background: #221A15; color: #F4ECDD; border: 1px solid #3B2F26; border-radius: 12px; height: 56px; padding: 0 16px; font-family: Archivo, sans-serif; font-size: 16px; caret-color: #E9A94A; width: 100%; box-sizing: border-box; } .ds-input::placeholder { color: #8A8073; } .ds-input:focus-visible { outline: 2px solid #E9A94A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Came Filter Chip",
+      "kind": "chip",
+      "description": "Filter chip pairing lamplight fill with a drawn corner came mark when selected.",
+      "html": "<button class=\"ds-chip ds-chip-active\"><span class=\"ds-came\"></span>Expense</button>",
+      "css": ".ds-chip { position: relative; background: #221A15; color: #B9B0A2; border: 1px solid #3B2F26; border-radius: 12px; min-height: 44px; padding: 0 14px; font-family: Archivo, sans-serif; font-weight: 600; font-size: 12px; cursor: pointer; } .ds-chip-active { background: #E9A94A; color: #241C16; border-color: #E9A94A; } .ds-came { position: absolute; right: 6px; top: 6px; width: 10px; height: 10px; border-top: 2px solid #241C16; border-right: 2px solid #241C16; }"
+    },
+    {
+      "name": "Capiz Window Transom",
+      "kind": "custom",
+      "refersTo": "transom-plate",
+      "description": "Inverted Capiz Ivory transom displaying the total balance and active ledger proof.",
+      "html": "<div class=\"ds-transom\"><div class=\"ds-transom-top\"><span>ALL WALLETS · 2</span><span>Saved on device</span></div><div class=\"ds-transom-total\">₱12,450.00</div><div class=\"ds-transom-proof\">4 entries · 2 active</div></div>",
+      "css": ".ds-transom { background: #F4ECDD; color: #241C16; border-radius: 12px; padding: 14px 16px; font-family: Archivo, sans-serif; } .ds-transom-top { display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; letter-spacing: 0.14em; opacity: 0.72; } .ds-transom-total { margin-top: 6px; font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; } .ds-transom-proof { margin-top: 4px; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; opacity: 0.75; }"
+    },
+    {
+      "name": "Capiz Wallet Pane",
+      "kind": "card",
+      "refersTo": "wallet-pane",
+      "description": "Wallet pane lit from its bottom edge in proportion to its share of positive funds.",
+      "html": "<div class=\"ds-pane\"><div class=\"ds-pane-glow\"></div><div class=\"ds-pane-top\"><span>General Fund</span><span>64%</span></div><div class=\"ds-pane-amt\">₱8,000.00</div><div class=\"ds-pane-proof\">3 entries · Today</div></div>",
+      "css": ".ds-pane { position: relative; overflow: hidden; background: #2A211B; color: #F4ECDD; border: 1px solid #3B2F26; border-radius: 12px; padding: 12px; min-height: 88px; font-family: Archivo, sans-serif; display: flex; flex-direction: column; justify-content: space-between; } .ds-pane-glow { position: absolute; left: 0; right: 0; bottom: 0; height: 64%; background: linear-gradient(180deg, transparent 0%, rgba(233, 169, 74, 0.09) 50%, rgba(233, 169, 74, 0.22) 100%); pointer-events: none; } .ds-pane-top { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; position: relative; } .ds-pane-amt { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; position: relative; margin-top: 8px; } .ds-pane-proof { font-size: 11px; color: #8A8073; font-variant-numeric: tabular-nums; position: relative; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Capiz Window",
+    "overview": "MyBlessings treats a user's finances like a traditional Filipino capiz-shell window set in dark hardwood: every wallet or fund is a pane in one shared window frame, and the warm lamplight rising from the bottom edge of each pane shows how much of the total money it holds. The default appearance is a lamplit evening room so totals and entries stay calm and legible in dim sanctuary offices, kitchens, or evening shops, paired with a matching daylight noon exposure for outdoor use.\n\nThe interface rejects cold corporate fintech gradients, decorative donut charts, and gamified wealth tropes. Every screen stays grounded in plain stewardship language, high-contrast Philippine Peso tabular numbers, and structural came marks that communicate state without relying on color alone.",
+    "keyCharacteristics": [
+      "Five-tone hardwood-to-ivory shell ramp across both lamplit (dark default) and daylight (light) exposures.",
+      "One rounded window frame enclosing 4px-gapped wallet panes and a single contrasting transom plate.",
+      "Archivo across every text role with mandatory tabular numerals (tabular-nums) on all currency and proof counts.",
+      "Structural came marks (drawn corner rule and notch) paired with color on active, selected, and disabled controls."
+    ],
+    "rules": [
+      { "name": "The Single Transom Rule", "body": "Only the top total-balance transom on a window (and transient snackbars) may use the inverted plate surface; all other containers remain in the hardwood/ground/pane ramp.", "section": "colors" },
+      { "name": "The Brand-Ink Contrast Rule", "body": "Never place #FFFFFF text or icons on #E9A94A lamplight; always use the paired brandInk token (#241C16 dark / #FBF6EC light).", "section": "colors" },
+      { "name": "The Tabular Figures Rule", "body": "Every currency amount, percentage, entry count, and PIN digit renders with fontVariant: ['tabular-nums'] so columns never jitter as balances update.", "section": "typography" },
+      { "name": "The Flat-Pane Rule", "body": "Cards, wallet panes, and input fields never stack shadows or nest cards inside cards; lists inside a container separate rows with 1px bottom hairlines.", "section": "elevation" },
+      { "name": "The Came Mark Rule", "body": "Active filter chips, wallet kind presets, theme options, type toggles, and category tiles mark selection with a drawn corner came mark (CameMark) in addition to border and fill shifts so state never depends on color alone.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do keep dark (lamplit room) as the default exposure while supporting light (daylight) and system via theme tokens.",
+      "Do include CameMark on selectable chips, toggles, and presets so selection is structurally legible.",
+      "Do enforce tabular-nums and integer centavos (₱) on every financial amount and proof metric.",
+      "Do keep every touch target at 44px–48px minimum height/width."
+    ],
+    "donts": [
+      "Don't place #FFFFFF text or icons on #E9A94A lamplight; use brandInk.",
+      "Don't add eyebrow/kicker labels above headings (ScreenHeader or section headers).",
+      "Don't nest cards inside cards or add decorative charts, gradients, or trust badges outside the proportional pane lamplight.",
+      "Don't auto-seed wallets or fake balances; empty states must teach and invite manual creation."
+    ]
+  }
+}

@@ -92,13 +92,18 @@ function PinKey({
       accessibilityLabel={label}
       disabled={disabled}
       onPress={onPress}
-      className="h-16 w-16 items-center justify-center rounded-full border border-line bg-surface"
+      className="h-16 w-16 items-center justify-center rounded-full border border-line bg-pane"
       style={({ pressed }) => ({
         opacity: disabled ? 0.4 : 1,
         transform: [{ scale: pressed ? 0.96 : 1 }],
       })}
     >
-      <Text className="text-2xl font-semibold text-ink">{label}</Text>
+      <Text
+        style={{ fontVariant: ['tabular-nums'] }}
+        className="font-body-semibold text-2xl tabular-nums text-ink"
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }

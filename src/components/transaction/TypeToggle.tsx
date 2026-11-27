@@ -1,5 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 
+import { CameMark } from '@/components/ui/CameMark';
 import type { TransactionKind } from '@/domain/transaction';
 import { useThemeColors } from '@/stores/themeStore';
 
@@ -8,7 +9,7 @@ type TypeToggleProps = {
   onChange: (value: TransactionKind) => void;
 };
 
-/** Expense / income switch. The selected side takes its semantic colour. */
+/** Expense / income switch. Selected option carries both its semantic tint and a came mark. */
 export function TypeToggle({ value, onChange }: TypeToggleProps) {
   const themeColors = useThemeColors();
   const options: readonly { value: TransactionKind; label: string; tint: string }[] = [
@@ -17,7 +18,7 @@ export function TypeToggle({ value, onChange }: TypeToggleProps) {
   ];
 
   return (
-    <View className="flex-row rounded-xl bg-canvas p-1">
+    <View className="flex-row gap-1 rounded-pane border border-line bg-pane p-1">
       {options.map((option) => {
         const selected = option.value === value;
 
@@ -28,7 +29,7 @@ export function TypeToggle({ value, onChange }: TypeToggleProps) {
             accessibilityLabel={option.label}
             accessibilityState={{ selected }}
             onPress={() => onChange(option.value)}
-            className="flex-1 items-center justify-center rounded-lg py-2.5"
+            className="relative min-h-[44px] flex-1 items-center justify-center overflow-hidden rounded-lg py-2.5"
             style={
               selected
                 ? {
@@ -39,8 +40,9 @@ export function TypeToggle({ value, onChange }: TypeToggleProps) {
                 : undefined
             }
           >
+            <CameMark active={selected} color={option.tint} />
             <Text
-              className="text-sm font-semibold"
+              className="font-body-semibold text-sm"
               style={{ color: selected ? option.tint : themeColors.inkMuted }}
             >
               {option.label}

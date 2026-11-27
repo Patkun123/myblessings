@@ -6,7 +6,7 @@ import { sql, type SQL } from 'drizzle-orm';
 import { SQLiteSyncDialect } from 'drizzle-orm/sqlite-core';
 
 import { expenseSumSql, incomeSumSql, signedAmountSql } from '@/db/queries/ledger';
-import { transaction, wallet } from '@/db/schema';
+import { category, transaction, wallet } from '@/db/schema';
 
 /**
  * Ledger contract tests.
@@ -251,6 +251,176 @@ describe('list filters (mirrors transactionsQuery)', () => {
     expect(list(database, { search: 'food' })).toEqual(['tx-food']);
     expect(list(database, { search: 'salary' })).toEqual(['tx-in']);
     expect(list(database, { search: 'nothing' })).toEqual([]);
+    database.close();
+  });
+});
+
+describe('daily trend queries (mirrors walletBalancesBeforeDateQuery & dailyTrendTotalsQuery)', () => {
+  it('computes starting balance before a cutoff without duplicating opening balances', () => {
+    const database = seededDatabase();
+    // Cutoff 2026-11-06 includes ₱500 opening + ₱1,000 income on Nov 5 (₱1,500.00).
+    const preRowsQuery = dialect.sqlToQuery(sql`
+      SELECT ${wallet.id} AS walletId, ${wallet.openingBalanceCentavos} + ${signedAmountSql} AS balance
+      FROM ${wallet}
+      LEFT JOIN ${transaction}
+        ON ${transaction.walletId} = ${wallet.id}
+       AND ${transaction.deletedAt} IS NULL
+       AND ${transaction.occurredOn} < ${'2026-11-06'}
+      WHERE ${wallet.userId} = ${'u1'}
+        AND ${wallet.isArchived} = 0
+        AND ${wallet.deletedAt} IS NULL
+      GROUP BY ${wallet.id}
+    `);
+
+    const rows = database
+      .prepare(preRowsQuery.sql)
+      .all(...(preRowsQuery.params as (string | number | null)[])) as {
+      walletId: string;
+      balance: number;
+    }[];
+
+    const startingBalance = rows.reduce((sum, r) => sum + Number(r.balance), 0);
+    expect(startingBalance).toBe(150_000);
+    database.close();
+  });
+
+  it('aggregates daily income, expense, and net ledger movement across active wallets', () => {
+    const database = seededDatabase();
+    const dailyQuery = dialect.sqlToQuery(sql`
+      SELECT
+        ${transaction.occurredOn} AS occurredOn,
+        ${incomeSumSql} AS incomeCentavos,
+        ${expenseSumSql} AS expenseCentavos,
+        ${signedAmountSql} AS netLedgerCentavos
+      FROM ${transaction}
+      INNER JOIN ${wallet} ON ${wallet.id} = ${transaction.walletId}
+      WHERE ${transaction.userId} = ${'u1'}
+        AND ${transaction.deletedAt} IS NULL
+        AND ${wallet.isArchived} = 0
+        AND ${wallet.deletedAt} IS NULL
+        AND ${transaction.occurredOn} >= ${'2026-11-06'}
+        AND ${transaction.occurredOn} <= ${'2026-11-30'}
+      GROUP BY ${transaction.occurredOn}
+      ORDER BY ${transaction.occurredOn} ASC
+    `);
+
+    const rows = database
+      .prepare(dailyQuery.sql)
+      .all(...(dailyQuery.params as (string | number | null)[])) as {
+      occurredOn: string;
+      incomeCentavos: number;
+      expenseCentavos: number;
+      netLedgerCentavos: number;
+    }[];
+
+    expect(rows).toEqual([
+      {
+        occurredOn: '2026-11-06',
+        incomeCentavos: 0,
+        expenseCentavos: 25_050,
+        netLedgerCentavos: -25_050,
+      },
+      {
+        occurredOn: '2026-11-07',
+        incomeCentavos: 0,
+        expenseCentavos: 0,
+        netLedgerCentavos: 0,
+      },
+    ]);
+    database.close();
+  });
+});
+
+describe('category totals query (mirrors categoryTotalsQuery)', () => {
+  it('sums live category amounts within date bounds and excludes soft-deleted rows and transfers', () => {
+    const database = seededDatabase();
+    const totalExpr = sql<number>`COALESCE(SUM(${transaction.amountCentavos}), 0)`;
+    const catQuery = dialect.sqlToQuery(sql`
+      SELECT
+        ${transaction.categoryId} AS categoryId,
+        ${category.name} AS categoryName,
+        ${totalExpr} AS totalCentavos
+      FROM ${transaction}
+      INNER JOIN ${wallet} ON ${wallet.id} = ${transaction.walletId}
+      LEFT JOIN ${category} ON ${category.id} = ${transaction.categoryId}
+      WHERE ${transaction.userId} = ${'u1'}
+        AND ${transaction.deletedAt} IS NULL
+        AND ${wallet.isArchived} = 0
+        AND ${wallet.deletedAt} IS NULL
+        AND ${transaction.type} = ${'expense'}
+        AND ${transaction.occurredOn} >= ${'2026-11-01'}
+        AND ${transaction.occurredOn} <= ${'2026-11-30'}
+      GROUP BY ${transaction.categoryId}
+      ORDER BY ${totalExpr} DESC
+    `);
+
+    const rows = database
+      .prepare(catQuery.sql)
+      .all(...(catQuery.params as (string | number | null)[])) as {
+      categoryId: string | null;
+      categoryName: string | null;
+      totalCentavos: number;
+    }[];
+
+    // tx-gone (₱100) is soft-deleted, so only tx-food (₱250.50) is counted.
+    expect(rows).toEqual([
+      {
+        categoryId: 'c-out',
+        categoryName: 'Food',
+        totalCentavos: 25_050,
+      },
+    ]);
+    database.close();
+  });
+});
+
+describe('wallet breakdown query (mirrors walletBalancesQuery)', () => {
+  it('returns opening, income, expense, and derived balance per active wallet', () => {
+    const database = seededDatabase();
+    const q = dialect.sqlToQuery(sql`
+      SELECT
+        ${wallet.id} AS id,
+        ${wallet.openingBalanceCentavos} AS openingBalanceCentavos,
+        ${incomeSumSql} AS incomeCentavos,
+        ${expenseSumSql} AS expenseCentavos,
+        ${wallet.openingBalanceCentavos} + ${signedAmountSql} AS balanceCentavos
+      FROM ${wallet}
+      LEFT JOIN ${transaction}
+        ON ${transaction.walletId} = ${wallet.id}
+       AND ${transaction.deletedAt} IS NULL
+      WHERE ${wallet.userId} = ${'u1'}
+        AND ${wallet.isArchived} = 0
+        AND ${wallet.deletedAt} IS NULL
+      GROUP BY ${wallet.id}
+      ORDER BY ${wallet.sortOrder}, ${wallet.name}
+    `);
+
+    const rows = database
+      .prepare(q.sql)
+      .all(...(q.params as (string | number | null)[])) as {
+      id: string;
+      openingBalanceCentavos: number;
+      incomeCentavos: number;
+      expenseCentavos: number;
+      balanceCentavos: number;
+    }[];
+
+    expect(rows).toEqual([
+      {
+        id: 'w2',
+        openingBalanceCentavos: 0,
+        incomeCentavos: 0,
+        expenseCentavos: 0,
+        balanceCentavos: 5_000,
+      },
+      {
+        id: 'w1',
+        openingBalanceCentavos: 50_000,
+        incomeCentavos: 100_000,
+        expenseCentavos: 25_050,
+        balanceCentavos: 119_950,
+      },
+    ]);
     database.close();
   });
 });

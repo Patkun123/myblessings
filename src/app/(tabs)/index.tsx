@@ -1,14 +1,15 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { TransactionRow } from '@/components/transaction/TransactionRow';
+import { TransactionSheet } from '@/components/transaction/TransactionSheet';
 import { AmountText } from '@/components/ui/AmountText';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { FAB } from '@/components/ui/FAB';
+import { QuickAddHost } from '@/components/ui/QuickAddHost';
 import { Screen } from '@/components/ui/Screen';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { WalletRow } from '@/components/wallet/WalletRow';
+import { CapizWindow } from '@/components/wallet/CapizWindow';
+import type { TransactionWithMeta } from '@/db/queries/transaction';
 import { sumCentavos } from '@/domain/money';
 import { useMonthTotals } from '@/hooks/useMonthTotals';
 import { useRecentTransactions } from '@/hooks/useRecentTransactions';
@@ -17,101 +18,100 @@ import { useWalletBalances } from '@/hooks/useWalletBalances';
 export default function DashboardScreen() {
   const { wallets } = useWalletBalances();
   const totalCentavos = sumCentavos(wallets.map((wallet) => wallet.balanceCentavos));
-  const { incomeCentavos, expenseCentavos } = useMonthTotals();
-  const recent = useRecentTransactions(5);
+  const { incomeCentavos, expenseCentavos, netCentavos } = useMonthTotals();
+  const recent = useRecentTransactions(3);
+  const [editingTransaction, setEditingTransaction] = useState<TransactionWithMeta | null>(null);
 
   const hasWallets = wallets.length > 0;
+  const flowTotal = incomeCentavos + expenseCentavos;
+  const incomePercent = flowTotal > 0 ? Math.round((incomeCentavos / flowTotal) * 100) : 0;
+  const expensePercent = flowTotal > 0 ? 100 - incomePercent : 0;
 
   return (
     <Screen>
-      <ScreenHeader title="Overview" subtitle="Everything, across all your wallets." />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 12, paddingBottom: 96 }}
+      >
+        <CapizWindow wallets={wallets} totalCentavos={totalCentavos} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 96 }}>
-        <View className="rounded-card bg-brand p-5">
-          <Text className="text-sm font-medium text-white/80">Total balance</Text>
-          <AmountText centavos={totalCentavos} tone="inverse" size="xl" className="mt-1" />
-          <Text className="mt-2 text-xs text-white/70">
-            {wallets.length === 1 ? '1 active wallet' : `${wallets.length} active wallets`}
-          </Text>
-        </View>
+        {/* Month summary: IN / OUT / NET at 13px over a 3px proportional bar */}
+        <View className="mt-4 px-1">
+          <View className="flex-row items-center justify-between gap-2">
+            <View className="flex-1">
+              <Text className="font-body-semibold text-[10px] tracking-label text-ink-faint">
+                IN
+              </Text>
+              <AmountText centavos={incomeCentavos} tone="income" size="xs" className="mt-0.5" />
+            </View>
 
-        <View className="mt-4 flex-row gap-3">
-          <Card className="flex-1">
-            <Text className="text-xs font-medium text-ink-muted">Income this month</Text>
-            <AmountText centavos={incomeCentavos} tone="income" size="lg" className="mt-1" />
-          </Card>
-          <Card className="flex-1">
-            <Text className="text-xs font-medium text-ink-muted">Expenses this month</Text>
-            <AmountText centavos={expenseCentavos} tone="expense" size="lg" className="mt-1" />
-          </Card>
-        </View>
+            <View className="flex-1 items-center">
+              <Text className="font-body-semibold text-[10px] tracking-label text-ink-faint">
+                OUT
+              </Text>
+              <AmountText centavos={expenseCentavos} tone="expense" size="xs" className="mt-0.5" />
+            </View>
 
-        <View className="mt-6">
-          <View className="mb-2 flex-row items-center justify-between">
-            <Text className="text-base font-semibold text-ink">Wallets</Text>
-            {hasWallets ? (
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => router.push('/(tabs)/wallets')}
-              >
-                <Text className="text-sm font-medium text-brand">View all</Text>
-              </Pressable>
-            ) : null}
+            <View className="flex-1 items-end">
+              <Text className="font-body-semibold text-[10px] tracking-label text-ink-faint">
+                NET
+              </Text>
+              <AmountText
+                centavos={netCentavos}
+                tone={netCentavos < 0 ? 'expense' : 'neutral'}
+                size="xs"
+                className="mt-0.5"
+              />
+            </View>
           </View>
 
-          <Card className="py-1">
-            {hasWallets ? (
-              wallets.slice(0, 3).map((wallet, index) => (
-                <View
-                  key={wallet.id}
-                  className={
-                    index === Math.min(wallets.length, 3) - 1 ? undefined : 'border-b border-line'
-                  }
-                >
-                  <WalletRow wallet={wallet} />
-                </View>
-              ))
-            ) : (
-              <View className="items-center px-4 py-6">
-                <Text className="text-center text-sm text-ink-muted">
-                  No wallets yet. Create one to start tracking your money.
-                </Text>
-                <View className="mt-4 w-full max-w-xs">
-                  <Button label="Create wallet" onPress={() => router.push('/wallet/new')} />
-                </View>
-              </View>
-            )}
-          </Card>
+          <View className="mt-2 h-[3px] flex-row overflow-hidden rounded-full bg-line">
+            {flowTotal > 0 ? (
+              <>
+                {incomePercent > 0 ? (
+                  <View className="h-full bg-income" style={{ width: `${incomePercent}%` }} />
+                ) : null}
+                {expensePercent > 0 ? (
+                  <View className="h-full bg-expense" style={{ width: `${expensePercent}%` }} />
+                ) : null}
+              </>
+            ) : null}
+          </View>
         </View>
 
+        {/* Latest ledger entries (max 3) */}
         <View className="mt-6">
-          <View className="mb-2 flex-row items-center justify-between">
-            <Text className="text-base font-semibold text-ink">Recent activity</Text>
+          <View className="mb-2 flex-row items-center justify-between px-1">
+            <Text className="font-body-semibold text-[11px] tracking-label text-ink-muted">
+              LATEST
+            </Text>
             {recent.length > 0 ? (
               <Pressable
                 accessibilityRole="button"
+                hitSlop={8}
                 onPress={() => router.push('/(tabs)/transactions')}
               >
-                <Text className="text-sm font-medium text-brand">See all</Text>
+                <Text className="font-body-semibold text-xs text-brand">View all</Text>
               </Pressable>
             ) : null}
           </View>
 
-          <Card className="py-1">
+          <View className="rounded-pane border border-line bg-surface px-3.5">
             {recent.length === 0 ? (
-              <View className="items-center px-4 py-6">
-                <Text className="text-center text-sm text-ink-muted">
-                  Nothing recorded yet. Add your first income or expense and it will show up
-                  here.
+              <View className="items-center px-3 py-6">
+                <Text className="text-center font-body text-sm leading-5 text-ink-muted">
+                  {hasWallets
+                    ? 'Nothing recorded yet. Add your first income, expense, or giving entry.'
+                    : 'Add your first wallet on the Wallets tab to begin recording entries.'}
                 </Text>
-                {hasWallets ? (
-                  <View className="mt-4 w-full max-w-xs">
-                    <Button
-                      label="Add transaction"
-                      onPress={() => router.push('/transaction/new')}
-                    />
-                  </View>
-                ) : null}
+                <View className="mt-4 w-full max-w-xs">
+                  <Button
+                    label={hasWallets ? 'Record entry' : 'Open Wallets'}
+                    onPress={() =>
+                      router.push(hasWallets ? '/transaction/new' : '/(tabs)/wallets')
+                    }
+                  />
+                </View>
               </View>
             ) : (
               recent.map((transaction, index) => (
@@ -119,21 +119,24 @@ export default function DashboardScreen() {
                   key={transaction.id}
                   className={index === recent.length - 1 ? undefined : 'border-b border-line'}
                 >
-                  <TransactionRow transaction={transaction} />
+                  <TransactionRow
+                    transaction={transaction}
+                    onPress={() => setEditingTransaction(transaction)}
+                  />
                 </View>
               ))
             )}
-          </Card>
+          </View>
         </View>
       </ScrollView>
 
-      {hasWallets ? (
-        <FAB
-          icon="add"
-          label="Add transaction"
-          onPress={() => router.push('/transaction/new')}
-        />
-      ) : null}
+      <QuickAddHost hasWallets={hasWallets} />
+
+      <TransactionSheet
+        visible={editingTransaction !== null}
+        onClose={() => setEditingTransaction(null)}
+        transaction={editingTransaction}
+      />
     </Screen>
   );
 }

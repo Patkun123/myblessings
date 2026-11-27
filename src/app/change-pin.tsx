@@ -189,8 +189,8 @@ export default function ChangePinScreen() {
 
       <View className="flex-1 justify-between px-6 pb-8 pt-6">
         <View className="items-center">
-          <Text className="text-2xl font-bold text-ink">{title}</Text>
-          <Text className="mt-1.5 px-4 text-center text-sm leading-5 text-ink-muted">
+          <Text className="font-body-bold text-2xl text-ink">{title}</Text>
+          <Text className="mt-1.5 px-4 text-center font-body text-sm leading-5 text-ink-muted">
             {subtitle}
           </Text>
         </View>

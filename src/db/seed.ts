@@ -14,7 +14,7 @@ import { newId } from '@/utils/id';
  * a no-op after the first run.
  */
 export async function seedProfile(database: AppDatabase, userId: string): Promise<void> {
-  await database.insert(settings).values({ userId }).onConflictDoNothing();
+  await database.insert(settings).values({ userId, theme: 'dark' }).onConflictDoNothing();
 
   await database
     .insert(category)

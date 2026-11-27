@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -8,6 +9,7 @@ import {
   Modal as RNModal,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   View,
 } from 'react-native';
@@ -44,6 +46,8 @@ export function Sidebar() {
 
   const { profile } = useUserProfile();
   const themeColors = useThemeColors();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme !== 'light';
   const insets = useSafeAreaInsets();
 
   const drawerWidth = Math.min(Math.round(Dimensions.get('window').width * 0.8), 312);
@@ -120,7 +124,7 @@ export function Sidebar() {
     }
   }
 
-  function navigateTo(path: '/(tabs)/transactions' | '/settings') {
+  function navigateTo(path: '/(tabs)/transactions' | '/about' | '/settings') {
     close();
     router.push(path);
   }
@@ -132,6 +136,13 @@ export function Sidebar() {
       subtitle: 'View all recorded transactions',
       icon: 'time-outline',
       onPress: () => navigateTo('/(tabs)/transactions'),
+    },
+    {
+      id: 'about',
+      label: 'About',
+      subtitle: 'Application version & developer',
+      icon: 'information-circle-outline',
+      onPress: () => navigateTo('/about'),
     },
     {
       id: 'settings',
@@ -153,8 +164,13 @@ export function Sidebar() {
       >
         <View className="flex-1 flex-row">
           <Animated.View
-            style={{ opacity: backdropOpacity }}
-            className="absolute inset-0 bg-black/45 dark:bg-black/65"
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                opacity: backdropOpacity,
+                backgroundColor: isDark ? 'rgba(0, 0, 0, 0.65)' : 'rgba(0, 0, 0, 0.45)',
+              },
+            ]}
           >
             <Pressable
               accessibilityRole="button"
@@ -167,11 +183,14 @@ export function Sidebar() {
           <Animated.View
             style={{
               width: drawerWidth,
+              height: '100%',
+              backgroundColor: themeColors.surface,
+              borderRightWidth: 1,
+              borderRightColor: themeColors.line,
               transform: [{ translateX }],
               paddingTop: Math.max(insets.top, 16),
               paddingBottom: Math.max(insets.bottom, 16),
             }}
-            className="h-full border-r border-line bg-surface"
           >
             {/* Profile Header */}
             <View className="border-b border-line px-5 pb-5 pt-2">
@@ -186,9 +205,9 @@ export function Sidebar() {
                   <Avatar uri={profile?.avatarUri} name={displayName} size="lg" />
                   <View className="absolute -bottom-0.5 -right-0.5 h-6 w-6 items-center justify-center rounded-full border-2 border-surface bg-brand">
                     {uploading ? (
-                      <ActivityIndicator size="small" color="#FFFFFF" />
+                      <ActivityIndicator size="small" color={themeColors.brandInk} />
                     ) : (
-                      <Ionicons name="camera" size={12} color="#FFFFFF" />
+                      <Ionicons name="camera" size={12} color={themeColors.brandInk} />
                     )}
                   </View>
                 </Pressable>
@@ -210,10 +229,10 @@ export function Sidebar() {
                 onPress={() => navigateTo('/settings')}
                 className="mt-3"
               >
-                <Text className="text-lg font-bold text-ink" numberOfLines={1}>
+                <Text className="font-body-bold text-lg text-ink" numberOfLines={1}>
                   {displayName}
                 </Text>
-                <Text className="mt-0.5 text-xs text-ink-muted">
+                <Text className="mt-0.5 font-body text-xs text-ink-muted">
                   Tap photo to upload · Local profile
                 </Text>
               </Pressable>
@@ -227,17 +246,17 @@ export function Sidebar() {
                   accessibilityRole="button"
                   accessibilityLabel={item.label}
                   onPress={item.onPress}
-                  className="mb-1 flex-row items-center rounded-xl px-3 py-3"
+                  className="mb-1 flex-row items-center rounded-pane px-3 py-3"
                   style={({ pressed }) => ({
                     backgroundColor: pressed ? themeColors.brandLight : 'transparent',
                   })}
                 >
-                  <View className="h-10 w-10 items-center justify-center rounded-full bg-canvas">
-                    <Ionicons name={item.icon} size={20} color={themeColors.brand} />
+                  <View className="h-10 w-10 items-center justify-center rounded-pane border border-line bg-canvas">
+                    <Ionicons name={item.icon} size={19} color={themeColors.brand} />
                   </View>
                   <View className="ml-3 flex-1">
-                    <Text className="text-base font-semibold text-ink">{item.label}</Text>
-                    <Text className="text-xs text-ink-muted">{item.subtitle}</Text>
+                    <Text className="font-body-semibold text-base text-ink">{item.label}</Text>
+                    <Text className="font-body text-xs text-ink-muted">{item.subtitle}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={16} color={themeColors.inkFaint} />
                 </Pressable>
@@ -258,12 +277,12 @@ export function Sidebar() {
                   opacity: pressed ? 0.75 : 1,
                 })}
               >
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-canvas">
+                <View className="h-10 w-10 items-center justify-center rounded-pane border border-line bg-canvas">
                   <Ionicons name="log-out-outline" size={20} color={themeColors.expense} />
                 </View>
                 <View className="ml-3 flex-1">
-                  <Text className="text-base font-semibold text-expense">Logout</Text>
-                  <Text className="text-xs text-ink-muted">Sign out of this profile</Text>
+                  <Text className="font-body-semibold text-base text-expense">Logout</Text>
+                  <Text className="font-body text-xs text-ink-muted">Sign out of this profile</Text>
                 </View>
               </Pressable>
             </View>

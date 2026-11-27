@@ -2,38 +2,94 @@
 @tailwind components;
 @tailwind utilities;
 
+/* The Capiz Window — shell ramp, lamplit (dark, default) and daylight (light). */
 @layer base {
   :root {
-    --color-brand: 27 59 111;
-    --color-brand-dark: 18 40 77;
-    --color-brand-light: 235 241 250;
-    --color-accent: 181 138 27;
-    --color-accent-light: 251 243 217;
-    --color-income: 21 128 61;
-    --color-expense: 180 35 24;
-    --color-warning: 181 71 8;
-    --color-ink: 15 23 42;
-    --color-ink-muted: 82 99 122;
-    --color-ink-faint: 132 148 167;
-    --color-canvas: 245 247 251;
-    --color-surface: 255 255 255;
-    --color-line: 220 227 238;
+    --color-brand: 138 84 16;
+    --color-brand-dark: 107 64 12;
+    --color-brand-light: 240 226 198;
+    --color-brand-ink: 251 246 236;
+    --color-accent: 138 84 16;
+    --color-accent-light: 243 231 204;
+    --color-income: 47 107 79;
+    --color-expense: 168 65 43;
+    --color-warning: 138 90 0;
+    --color-ink: 36 28 22;
+    --color-ink-muted: 95 84 73;
+    --color-ink-faint: 138 124 108;
+    --color-canvas: 244 236 221;
+    --color-surface: 251 246 236;
+    --color-pane: 241 230 210;
+    --color-line: 217 201 172;
+    --color-plate: 36 28 22;
+    --color-plate-ink: 244 236 221;
   }
 
   .dark:root {
-    --color-brand: 53 104 196;
-    --color-brand-dark: 22 50 92;
-    --color-brand-light: 23 38 66;
-    --color-accent: 212 167 44;
-    --color-accent-light: 51 41 18;
-    --color-income: 34 197 94;
-    --color-expense: 248 113 113;
-    --color-warning: 251 146 60;
-    --color-ink: 238 242 249;
-    --color-ink-muted: 155 168 189;
-    --color-ink-faint: 104 119 142;
-    --color-canvas: 11 17 30;
-    --color-surface: 19 28 46;
-    --color-line: 35 49 75;
+    --color-brand: 233 169 74;
+    --color-brand-dark: 194 135 46;
+    --color-brand-light: 51 38 28;
+    --color-brand-ink: 36 28 22;
+    --color-accent: 233 169 74;
+    --color-accent-light: 58 44 29;
+    --color-income: 111 169 138;
+    --color-expense: 208 122 99;
+    --color-warning: 224 169 63;
+    --color-ink: 244 236 221;
+    --color-ink-muted: 185 176 162;
+    --color-ink-faint: 138 128 115;
+    --color-canvas: 28 22 19;
+    --color-surface: 34 26 21;
+    --color-pane: 42 33 27;
+    --color-line: 59 47 38;
+    --color-plate: 244 236 221;
+    --color-plate-ink: 36 28 22;
+  }
+
+  html,
+  body,
+  #root {
+    background-color: rgb(var(--color-canvas));
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* The parts we did not draw still carry the window. */
+  ::selection {
+    background-color: rgb(var(--color-brand) / 0.28);
+    color: rgb(var(--color-ink));
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--color-brand));
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-line)) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--color-line));
+    border-radius: 999px;
+  }
+
+  input,
+  textarea {
+    caret-color: rgb(var(--color-brand));
   }
 }

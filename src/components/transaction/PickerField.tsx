@@ -32,32 +32,32 @@ export function PickerField({
 
   return (
     <View>
-      <Text className="mb-1.5 text-sm font-medium text-ink-muted">{label}</Text>
+      <Text className="mb-1.5 font-body-medium text-sm text-ink-muted">{label}</Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
         onPress={onPress}
-        className={`h-14 flex-row items-center rounded-xl border bg-surface px-4 ${
+        className={`h-14 flex-row items-center rounded-pane border bg-surface px-4 ${
           error ? 'border-expense' : 'border-line'
         }`}
       >
         {icon ? (
           <View
-            className="mr-2.5 h-8 w-8 items-center justify-center rounded-full"
-            style={{ backgroundColor: `${resolvedIconColor}1A` }}
+            className="mr-2.5 h-8 w-8 items-center justify-center rounded-lg border border-line bg-pane"
+            style={{ borderColor: `${resolvedIconColor}55` }}
           >
             <Ionicons name={icon} size={16} color={resolvedIconColor} />
           </View>
         ) : null}
         <Text
-          className={`flex-1 text-base ${value ? 'text-ink' : 'text-ink-faint'}`}
+          className={`flex-1 font-body text-base ${value ? 'text-ink' : 'text-ink-faint'}`}
           numberOfLines={1}
         >
           {value ?? placeholder}
         </Text>
         <Ionicons name="chevron-down" size={18} color={themeColors.inkFaint} />
       </Pressable>
-      {error ? <Text className="mt-1.5 text-sm text-expense">{error}</Text> : null}
+      {error ? <Text className="mt-1.5 font-body text-sm text-expense">{error}</Text> : null}
     </View>
   );
 }

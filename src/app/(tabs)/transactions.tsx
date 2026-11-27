@@ -1,17 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 
+import { TransactionRow } from '@/components/transaction/TransactionRow';
+import { TransactionSheet } from '@/components/transaction/TransactionSheet';
 import { AmountText } from '@/components/ui/AmountText';
 import { Button } from '@/components/ui/Button';
+import { CameMark } from '@/components/ui/CameMark';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { FAB } from '@/components/ui/FAB';
 import { Input } from '@/components/ui/Input';
+import { QuickAddHost } from '@/components/ui/QuickAddHost';
 import { Screen } from '@/components/ui/Screen';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Sheet } from '@/components/ui/Sheet';
-import { TransactionRow } from '@/components/transaction/TransactionRow';
+import { WalletSheet } from '@/components/wallet/WalletSheet';
 import type { TransactionWithMeta } from '@/db/queries/transaction';
 import { signedCentavos, type TransactionKind } from '@/domain/transaction';
 import { useTransactions } from '@/hooks/useTransactions';
@@ -59,10 +62,20 @@ function groupByDay(rows: TransactionWithMeta[]): ListItem[] {
 export default function TransactionsScreen() {
   const themeColors = useThemeColors();
   const { wallets } = useWalletBalances();
+  const params = useLocalSearchParams<{ walletId?: string }>();
   const [search, setSearch] = useState('');
   const [type, setType] = useState<TypeFilter>('all');
-  const [walletId, setWalletId] = useState<string | null>(null);
+  const [walletId, setWalletId] = useState<string | null>(params.walletId ?? null);
+  const [lastRouteWalletId, setLastRouteWalletId] = useState<string | undefined>(params.walletId);
   const [walletSheet, setWalletSheet] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<TransactionWithMeta | null>(null);
+  const [addTransactionOpen, setAddTransactionOpen] = useState(false);
+  const [addWalletOpen, setAddWalletOpen] = useState(false);
+
+  if (params.walletId !== lastRouteWalletId) {
+    setLastRouteWalletId(params.walletId);
+    if (params.walletId) setWalletId(params.walletId);
+  }
 
   const { transactions, hasMore, loadMore } = useTransactions({
     search,
@@ -102,12 +115,15 @@ export default function TransactionsScreen() {
                 accessibilityLabel={option.label}
                 accessibilityState={{ selected: active }}
                 onPress={() => setType(option.value)}
-                className={`rounded-full border px-3 py-1.5 ${
+                className={`relative min-h-[44px] justify-center overflow-hidden rounded-pane border px-3.5 py-2 ${
                   active ? 'border-brand bg-brand' : 'border-line bg-surface'
                 }`}
               >
+                <CameMark active={active} color={themeColors.brandInk} />
                 <Text
-                  className={`text-xs font-semibold ${active ? 'text-white' : 'text-ink-muted'}`}
+                  className={`font-body-semibold text-xs ${
+                    active ? 'text-brand-ink' : 'text-ink-muted'
+                  }`}
                 >
                   {option.label}
                 </Text>
@@ -119,17 +135,18 @@ export default function TransactionsScreen() {
             accessibilityRole="button"
             accessibilityLabel="Filter by wallet"
             onPress={() => setWalletSheet(true)}
-            className={`ml-auto flex-row items-center rounded-full border px-3 py-1.5 ${
+            className={`relative ml-auto min-h-[44px] flex-row items-center overflow-hidden rounded-pane border px-3 py-2 ${
               walletId ? 'border-brand bg-brand-light' : 'border-line bg-surface'
             }`}
           >
+            <CameMark active={Boolean(walletId)} />
             <Ionicons
               name="wallet-outline"
-              size={13}
+              size={14}
               color={walletId ? themeColors.brand : themeColors.inkMuted}
             />
             <Text
-              className={`ml-1 max-w-[110px] text-xs font-semibold ${
+              className={`ml-1.5 max-w-[110px] font-body-semibold text-xs ${
                 walletId ? 'text-brand' : 'text-ink-muted'
               }`}
               numberOfLines={1}
@@ -138,7 +155,7 @@ export default function TransactionsScreen() {
             </Text>
             <Ionicons
               name="chevron-down"
-              size={13}
+              size={14}
               color={walletId ? themeColors.brand : themeColors.inkMuted}
             />
           </Pressable>
@@ -153,7 +170,7 @@ export default function TransactionsScreen() {
         renderItem={({ item }) =>
           item.kind === 'day' ? (
             <View className="flex-row items-center justify-between pb-1 pt-4">
-              <Text className="text-xs font-semibold uppercase tracking-wider text-ink-faint">
+              <Text className="font-body-semibold text-[11px] uppercase tracking-label text-ink-faint">
                 {dayHeading(item.date)}
               </Text>
               <AmountText
@@ -163,7 +180,10 @@ export default function TransactionsScreen() {
               />
             </View>
           ) : (
-            <TransactionRow transaction={item.transaction} />
+            <TransactionRow
+              transaction={item.transaction}
+              onPress={() => setEditingTransaction(item.transaction)}
+            />
           )
         }
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 96 }}
@@ -180,11 +200,11 @@ export default function TransactionsScreen() {
             }
             action={
               filtering ? undefined : wallets.length === 0 ? (
-                <Button label="Create wallet" onPress={() => router.push('/wallet/new')} />
+                <Button label="Create wallet" onPress={() => setAddWalletOpen(true)} />
               ) : (
                 <Button
                   label="Record a transaction"
-                  onPress={() => router.push('/transaction/new')}
+                  onPress={() => setAddTransactionOpen(true)}
                 />
               )
             }
@@ -199,7 +219,21 @@ export default function TransactionsScreen() {
         }
       />
 
-      <FAB icon="add" label="Add transaction" onPress={() => router.push('/transaction/new')} />
+      <QuickAddHost hasWallets={wallets.length > 0} />
+
+      <TransactionSheet
+        visible={editingTransaction !== null}
+        onClose={() => setEditingTransaction(null)}
+        transaction={editingTransaction}
+      />
+
+      <TransactionSheet
+        visible={addTransactionOpen}
+        onClose={() => setAddTransactionOpen(false)}
+        initialType="expense"
+      />
+
+      <WalletSheet visible={addWalletOpen} onClose={() => setAddWalletOpen(false)} />
 
       <Sheet visible={walletSheet} onClose={() => setWalletSheet(false)} title="Filter by wallet">
         <ScrollView style={{ maxHeight: 360 }} showsVerticalScrollIndicator={false}>

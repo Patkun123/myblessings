@@ -67,10 +67,10 @@ export default function PinSetupScreen() {
     <SafeAreaView className="flex-1 bg-canvas">
       <View className="flex-1 justify-between px-6 pb-8 pt-14">
         <View className="items-center">
-          <Text className="text-2xl font-bold text-ink">
+          <Text className="font-body-bold text-2xl text-ink">
             {step === 'create' ? 'Create a PIN' : 'Confirm your PIN'}
           </Text>
-          <Text className="mt-1.5 px-4 text-center text-sm leading-5 text-ink-muted">
+          <Text className="mt-1.5 px-4 text-center font-body text-sm leading-5 text-ink-muted">
             {step === 'create'
               ? `Choose ${PIN_LENGTH} digits. You will need them every time the app opens.`
               : 'Enter the same PIN once more.'}

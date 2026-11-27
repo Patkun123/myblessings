@@ -27,7 +27,7 @@ export default function NewWalletScreen() {
   return (
     <Screen appHeader={false}>
       <View className="flex-row items-center justify-between pb-4 pt-3">
-        <Text className="text-2xl font-bold text-ink">New wallet</Text>
+        <Text className="font-body-bold text-2xl text-ink">New wallet</Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Close"

@@ -1,7 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
-import { CategoryPicker, WalletPicker } from '@/components/transaction/TransactionPickers';
+import { CameMark } from '@/components/ui/CameMark';
+import {
+  CategoryPicker,
+  CategoryPickerGrid,
+  WalletPicker,
+  WalletPickerList,
+} from '@/components/transaction/TransactionPickers';
 import { TypeToggle } from '@/components/transaction/TypeToggle';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -41,6 +48,10 @@ type TransactionFormProps = {
   wallets: WalletBalanceRow[];
   /** Present when editing an existing entry. */
   initial?: TransactionFormInitial;
+  /** Default type when creating a new entry (ignored if `initial` is provided). */
+  initialType?: TransactionKind;
+  /** Use `'inline'` inside bottom sheets to avoid nested modal dialogs on iOS. */
+  pickerMode?: 'sheet' | 'inline';
   submitLabel: string;
   onSubmit: (values: TransactionFormValues) => Promise<void>;
   onDelete?: () => void;
@@ -59,11 +70,14 @@ function DateChip({ label, active, onPress }: DateChipProps) {
       accessibilityLabel={label}
       accessibilityState={{ selected: active }}
       onPress={onPress}
-      className={`rounded-full border px-3.5 py-1.5 ${
+      className={`relative min-h-[44px] justify-center overflow-hidden rounded-pane border px-4 py-2 ${
         active ? 'border-brand bg-brand-light' : 'border-line bg-surface'
       }`}
     >
-      <Text className={`text-xs font-semibold ${active ? 'text-brand' : 'text-ink-muted'}`}>
+      <CameMark active={active} />
+      <Text
+        className={`font-body-semibold text-xs ${active ? 'text-brand' : 'text-ink-muted'}`}
+      >
         {label}
       </Text>
     </Pressable>
@@ -80,6 +94,8 @@ function DateChip({ label, active, onPress }: DateChipProps) {
 export function TransactionForm({
   wallets,
   initial,
+  initialType = 'expense',
+  pickerMode = 'sheet',
   submitLabel,
   onSubmit,
   onDelete,
@@ -88,7 +104,7 @@ export function TransactionForm({
   const today = todayCalendarDate();
   const yesterday = yesterdayCalendarDate();
 
-  const [type, setType] = useState<TransactionKind>(initial?.type ?? 'expense');
+  const [type, setType] = useState<TransactionKind>(initial?.type ?? initialType);
   const [amount, setAmount] = useState(
     initial ? toDecimalString(initial.amountCentavos) : ''
   );
@@ -99,6 +115,7 @@ export function TransactionForm({
   const [occurredOn, setOccurredOn] = useState(initial?.occurredOn ?? today);
   const [description, setDescription] = useState(initial?.description ?? '');
   const [note, setNote] = useState(initial?.note ?? '');
+  const [inlinePicker, setInlinePicker] = useState<'none' | 'wallet' | 'category'>('none');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -143,16 +160,57 @@ export function TransactionForm({
     }
   }
 
+  if (pickerMode === 'inline' && inlinePicker !== 'none') {
+    const pickingWallet = inlinePicker === 'wallet';
+    return (
+      <View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back to entry"
+          onPress={() => setInlinePicker('none')}
+          className="mb-3 flex-row items-center gap-1.5 self-start rounded-pane border border-line bg-pane px-3 py-2"
+        >
+          <Ionicons name="arrow-back" size={16} color={themeColors.ink} />
+          <Text className="font-body-semibold text-xs text-ink">
+            {pickingWallet ? 'Choose wallet' : 'Choose category'}
+          </Text>
+        </Pressable>
+
+        {pickingWallet ? (
+          <WalletPickerList
+            wallets={wallets}
+            value={walletId}
+            onSelect={(id) => {
+              setWalletId(id);
+              clearError();
+              setInlinePicker('none');
+            }}
+          />
+        ) : (
+          <CategoryPickerGrid
+            categories={categories}
+            value={categoryId}
+            onSelect={(id) => {
+              setCategoryId(id);
+              clearError();
+              setInlinePicker('none');
+            }}
+          />
+        )}
+      </View>
+    );
+  }
+
   return (
     <View>
       <TypeToggle value={type} onChange={handleTypeChange} />
 
       <View
-        className={`mt-4 flex-row items-center justify-center rounded-2xl border bg-surface px-4 py-3 ${
+        className={`mt-4 flex-row items-center justify-center rounded-pane border bg-surface px-4 py-3 ${
           error ? 'border-expense' : 'border-line'
         }`}
       >
-        <Text className="mr-1 text-3xl font-semibold text-ink-faint">₱</Text>
+        <Text className="mr-1 font-body-semibold text-3xl text-ink-faint">₱</Text>
         <TextInput
           value={amount}
           onChangeText={(text) => {
@@ -165,17 +223,28 @@ export function TransactionForm({
           autoFocus={!initial}
           accessibilityLabel="Amount"
           testID="transaction-amount"
-          className="flex-1 text-center text-4xl font-bold text-ink"
+          style={{ fontVariant: ['tabular-nums'] }}
+          className="flex-1 text-center font-body-bold text-4xl tabular-nums text-ink"
         />
       </View>
 
       <View className="mt-4 gap-4">
-        <WalletPicker wallets={wallets} value={walletId} onChange={setWalletId} />
-        <CategoryPicker categories={categories} value={categoryId} onChange={setCategoryId} />
+        <WalletPicker
+          wallets={wallets}
+          value={walletId}
+          onChange={setWalletId}
+          onRequestOpen={pickerMode === 'inline' ? () => setInlinePicker('wallet') : undefined}
+        />
+        <CategoryPicker
+          categories={categories}
+          value={categoryId}
+          onChange={setCategoryId}
+          onRequestOpen={pickerMode === 'inline' ? () => setInlinePicker('category') : undefined}
+        />
       </View>
 
       <View className="mt-4">
-        <Text className="mb-1.5 text-sm font-medium text-ink-muted">Date</Text>
+        <Text className="mb-1.5 font-body-medium text-sm text-ink-muted">Date</Text>
         <View className="flex-row gap-2">
           <DateChip
             label="Today"

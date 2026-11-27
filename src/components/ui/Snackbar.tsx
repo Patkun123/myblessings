@@ -1,8 +1,11 @@
+import { useColorScheme } from 'nativewind';
 import { useCallback, useEffect, useState } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { darkColors, lightColors } from '@/constants/theme';
 import { useSnackbarStore } from '@/stores/snackbarStore';
+import { useThemeColors } from '@/stores/themeStore';
 
 /**
  * Renders the current snackbar above the tab bar. Mounted once in the root
@@ -12,6 +15,9 @@ export function SnackbarHost() {
   const current = useSnackbarStore((state) => state.current);
   const dismiss = useSnackbarStore((state) => state.dismiss);
   const insets = useSafeAreaInsets();
+  const themeColors = useThemeColors();
+  const { colorScheme } = useColorScheme();
+  const actionColor = colorScheme === 'light' ? darkColors.brand : lightColors.brand;
 
   // Lazy state keeps one Animated.Value per component without reading a ref
   // during render (react-hooks/refs).
@@ -49,25 +55,29 @@ export function SnackbarHost() {
       className="absolute inset-x-0"
       style={{ bottom: insets.bottom + 72 }}
     >
-      <Animated.View
-        style={{ opacity, transform: [{ translateY }] }}
-        className="mx-5 flex-row items-center gap-3 rounded-xl border border-transparent bg-[#0F172A] px-4 py-3 dark:border-line dark:bg-[#1E2B45]"
-      >
-        <Text className="flex-1 text-sm text-white" numberOfLines={2}>
-          {current.message}
-        </Text>
-        {current.action ? (
-          <Pressable
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={() => {
-              current.action?.onPress();
-              hide();
-            }}
-          >
-            <Text className="text-sm font-semibold text-[#93C5FD]">{current.action.label}</Text>
-          </Pressable>
-        ) : null}
+      <Animated.View style={{ opacity, transform: [{ translateY }] }}>
+        <View
+          style={{ backgroundColor: themeColors.plate, borderColor: themeColors.line }}
+          className="mx-5 flex-row items-center gap-3 rounded-pane border px-4 py-3"
+        >
+          <Text className="flex-1 font-body text-sm text-plate-ink" numberOfLines={2}>
+            {current.message}
+          </Text>
+          {current.action ? (
+            <Pressable
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => {
+                current.action?.onPress();
+                hide();
+              }}
+            >
+              <Text style={{ color: actionColor }} className="font-body-semibold text-sm">
+                {current.action.label}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
       </Animated.View>
     </View>
   );

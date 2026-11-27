@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, ScrollView, Switch, Text, View } from 're
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
+import { CameMark } from '@/components/ui/CameMark';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
@@ -144,7 +145,7 @@ export default function SettingsScreen() {
   return (
     <Screen appHeader={false}>
       <View className="flex-row items-center justify-between pb-4 pt-3">
-        <Text className="text-2xl font-bold text-ink">Settings</Text>
+        <Text className="font-body-bold text-2xl text-ink">Settings</Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Close"
@@ -173,9 +174,9 @@ export default function SettingsScreen() {
               <Avatar uri={profile?.avatarUri} name={displayName} size="lg" />
               <View className="absolute -bottom-0.5 -right-0.5 h-6 w-6 items-center justify-center rounded-full border-2 border-surface bg-brand">
                 {uploadingPhoto ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <ActivityIndicator size="small" color={themeColors.brandInk} />
                 ) : (
-                  <Ionicons name="camera" size={12} color="#FFFFFF" />
+                  <Ionicons name="camera" size={12} color={themeColors.brandInk} />
                 )}
               </View>
             </Pressable>
@@ -263,7 +264,7 @@ export default function SettingsScreen() {
               value={isDarkActive}
               onValueChange={(enabled) => void handleSelectTheme(enabled ? 'dark' : 'light')}
               trackColor={{ false: themeColors.line, true: themeColors.brand }}
-              thumbColor="#FFFFFF"
+              thumbColor={themeColors.surface}
             />
           </View>
 
@@ -279,18 +280,19 @@ export default function SettingsScreen() {
                     accessibilityLabel={`${option.label} theme`}
                     accessibilityState={{ selected }}
                     onPress={() => void handleSelectTheme(option.value)}
-                    className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-xl border py-2.5 ${
+                    className={`relative min-h-[44px] flex-1 flex-row items-center justify-center gap-1.5 overflow-hidden rounded-pane border py-2.5 ${
                       selected ? 'border-brand bg-brand-light' : 'border-line bg-canvas'
                     }`}
                   >
+                    <CameMark active={selected} />
                     <Ionicons
                       name={option.icon}
                       size={16}
                       color={selected ? themeColors.brand : themeColors.inkMuted}
                     />
                     <Text
-                      className={`text-xs font-semibold ${
-                        selected ? 'text-brand' : 'text-ink-muted'
+                      className={`text-xs ${
+                        selected ? 'font-body-semibold text-brand' : 'font-body-medium text-ink-muted'
                       }`}
                     >
                       {option.label}

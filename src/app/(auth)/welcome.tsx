@@ -91,18 +91,18 @@ export default function WelcomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View>
-          <View className="h-16 w-16 items-center justify-center rounded-2xl bg-brand">
-            <Ionicons name="heart" size={32} color="#FFFFFF" />
+          <View className="h-14 w-14 items-center justify-center rounded-pane bg-brand">
+            <Ionicons name="heart" size={28} color={themeColors.brandInk} />
           </View>
 
-          <Text className="mt-6 text-3xl font-bold text-ink">Welcome to MyBlessings</Text>
-          <Text className="mt-2 text-base leading-6 text-ink-muted">
+          <Text className="mt-6 font-body-bold text-3xl text-ink">Welcome to MyBlessings</Text>
+          <Text className="mt-2 font-body text-base leading-6 text-ink-muted">
             Track income, expenses, and giving across your wallets — all stored on this device.
           </Text>
 
           {existingProfiles.length > 0 ? (
             <View className="mt-8">
-              <Text className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-faint">
+              <Text className="mb-2 font-body-semibold text-xs uppercase tracking-label text-ink-faint">
                 Existing profiles
               </Text>
               <Card className="py-1">
@@ -119,10 +119,10 @@ export default function WelcomeScreen() {
                   >
                     <Avatar uri={profile.avatarUri} name={profile.name} size="md" />
                     <View className="ml-3 flex-1">
-                      <Text className="text-base font-semibold text-ink" numberOfLines={1}>
+                      <Text className="font-body-semibold text-base text-ink" numberOfLines={1}>
                         {profile.name}
                       </Text>
-                      <Text className="text-xs text-ink-muted">Tap to sign in</Text>
+                      <Text className="font-body text-xs text-ink-muted">Tap to sign in</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color={themeColors.inkFaint} />
                   </Pressable>
@@ -132,11 +132,11 @@ export default function WelcomeScreen() {
           ) : null}
 
           <View className={existingProfiles.length > 0 ? 'mt-8' : 'mt-10'}>
-            <Text className="mb-1.5 text-sm font-medium text-ink-muted">
+            <Text className="mb-1.5 font-body-medium text-sm text-ink-muted">
               {existingProfiles.length > 0 ? 'Or create a new profile' : 'Profile name'}
             </Text>
             <TextInput
-              className="h-14 rounded-xl border border-line bg-surface px-4 text-base text-ink"
+              className="h-14 rounded-pane border border-line bg-surface px-4 font-body text-base text-ink"
               value={name}
               onChangeText={(text) => {
                 setName(text);

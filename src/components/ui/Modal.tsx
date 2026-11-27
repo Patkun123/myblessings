@@ -38,10 +38,10 @@ export function Modal({
           onPress={dismissable ? onClose : undefined}
           disabled={!dismissable}
         />
-        <View className="w-full max-w-sm rounded-card border border-line bg-surface p-5">
-          {title ? <Text className="text-lg font-semibold text-ink">{title}</Text> : null}
+        <View className="w-full max-w-sm rounded-window border border-line bg-surface p-5">
+          {title ? <Text className="font-body-bold text-lg text-ink">{title}</Text> : null}
           {message ? (
-            <Text className="mt-1.5 text-sm leading-5 text-ink-muted">{message}</Text>
+            <Text className="mt-1.5 font-body text-sm leading-5 text-ink-muted">{message}</Text>
           ) : null}
           {children ? <View className="mt-4">{children}</View> : null}
           {footer ? <View className="mt-5 gap-2">{footer}</View> : null}

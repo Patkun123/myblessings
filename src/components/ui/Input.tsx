@@ -19,9 +19,11 @@ export function Input({ label, error, hint, icon, right, ...rest }: InputProps) 
 
   return (
     <View>
-      {label ? <Text className="mb-1.5 text-sm font-medium text-ink-muted">{label}</Text> : null}
+      {label ? (
+        <Text className="mb-1.5 font-body-medium text-sm text-ink-muted">{label}</Text>
+      ) : null}
       <View
-        className={`h-14 flex-row items-center rounded-xl border bg-surface px-4 ${
+        className={`h-14 flex-row items-center rounded-pane border bg-surface px-4 ${
           error ? 'border-expense' : 'border-line'
         }`}
       >
@@ -31,7 +33,7 @@ export function Input({ label, error, hint, icon, right, ...rest }: InputProps) 
           </View>
         ) : null}
         <TextInput
-          className="flex-1 text-base text-ink"
+          className="flex-1 font-body text-base text-ink"
           placeholderTextColor={themeColors.inkFaint}
           accessibilityLabel={label}
           {...rest}
@@ -39,9 +41,9 @@ export function Input({ label, error, hint, icon, right, ...rest }: InputProps) 
         {right}
       </View>
       {error ? (
-        <Text className="mt-1.5 text-sm text-expense">{error}</Text>
+        <Text className="mt-1.5 font-body text-sm text-expense">{error}</Text>
       ) : hint ? (
-        <Text className="mt-1.5 text-xs text-ink-faint">{hint}</Text>
+        <Text className="mt-1.5 font-body text-xs text-ink-faint">{hint}</Text>
       ) : null}
     </View>
   );

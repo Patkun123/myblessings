@@ -1,3 +1,10 @@
+import {
+  Archivo_400Regular,
+  Archivo_500Medium,
+  Archivo_600SemiBold,
+  Archivo_700Bold,
+  useFonts,
+} from '@expo-google-fonts/archivo';
 import { migrate } from 'drizzle-orm/expo-sqlite/migrator';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -36,6 +43,14 @@ function describeError(error: unknown): string {
 type DbState = { status: 'loading' } | { status: 'ready' } | { status: 'error'; message: string };
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    Archivo_400Regular,
+    Archivo_500Medium,
+    Archivo_600SemiBold,
+    Archivo_700Bold,
+  });
+  const fontsReady = fontsLoaded || Boolean(fontError);
+
   const [dbState, setDbState] = useState<DbState>({ status: 'loading' });
   const [dbAttempt, setDbAttempt] = useState(0);
 
@@ -51,7 +66,7 @@ export default function RootLayout() {
   const setThemePreference = useThemeStore((state) => state.setPreference);
   const { colorScheme, setColorScheme } = useColorScheme();
   const themeColors = useThemeColors();
-  const resolvedScheme = colorScheme === 'dark' ? 'dark' : 'light';
+  const resolvedScheme = colorScheme === 'light' ? 'light' : 'dark';
 
   /**
    * Open the connection, then migrate. Both steps must finish before any screen
@@ -186,7 +201,7 @@ export default function RootLayout() {
         </View>
       </View>
     );
-  } else if (!dbReady || !hydrated) {
+  } else if (!dbReady || !hydrated || !fontsReady) {
     content = (
       <View className="flex-1 items-center justify-center bg-canvas">
         <ActivityIndicator color={themeColors.brand} />

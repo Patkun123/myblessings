@@ -40,14 +40,14 @@ export default function WalletSetupScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="h-12 w-12 items-center justify-center rounded-2xl bg-brand-light">
+          <View className="h-12 w-12 items-center justify-center rounded-pane border border-line bg-pane">
             <Ionicons name="wallet" size={24} color={themeColors.brand} />
           </View>
 
-          <Text className="mt-5 text-3xl font-bold text-ink">Create your first wallet</Text>
-          <Text className="mt-2 text-base leading-6 text-ink-muted">
-            A wallet is where money lives — cash on hand, a bank account, or an e-wallet. You can
-            add more later.
+          <Text className="mt-5 font-body-bold text-3xl text-ink">Create your first wallet</Text>
+          <Text className="mt-2 font-body text-base leading-6 text-ink-muted">
+            A wallet is where money lives — cash on hand, a bank account, an e-wallet, or a church
+            fund. You can add more later.
           </Text>
 
           <View className="mt-8">

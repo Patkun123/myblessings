@@ -33,15 +33,18 @@ export function MoneyInput({
 
   return (
     <View>
-      {label ? <Text className="mb-1.5 text-sm font-medium text-ink-muted">{label}</Text> : null}
+      {label ? (
+        <Text className="mb-1.5 font-body-medium text-sm text-ink-muted">{label}</Text>
+      ) : null}
       <View
-        className={`h-14 flex-row items-center rounded-xl border bg-surface px-4 ${
+        className={`h-14 flex-row items-center rounded-pane border bg-surface px-4 ${
           error ? 'border-expense' : 'border-line'
         }`}
       >
-        <Text className="mr-2 text-xl font-semibold text-ink-faint">₱</Text>
+        <Text className="mr-2 font-body-semibold text-xl text-ink-faint">₱</Text>
         <TextInput
-          className="flex-1 text-xl font-semibold text-ink"
+          style={{ fontVariant: ['tabular-nums'] }}
+          className="flex-1 font-body-semibold text-xl tabular-nums text-ink"
           value={value}
           onChangeText={(text) => onChangeText(sanitizeAmountInput(text))}
           keyboardType="decimal-pad"
@@ -56,7 +59,7 @@ export function MoneyInput({
           maxLength={13}
         />
       </View>
-      {error ? <Text className="mt-1.5 text-sm text-expense">{error}</Text> : null}
+      {error ? <Text className="mt-1.5 font-body text-sm text-expense">{error}</Text> : null}
     </View>
   );
 }

@@ -11,13 +11,14 @@ import { calendarDateLabel } from '@/utils/date';
 
 type TransactionRowProps = {
   transaction: TransactionWithMeta;
+  onPress?: () => void;
 };
 
 /**
  * One ledger entry: category icon, what it was, where it moved, and a signed
- * amount. Tapping opens the detail screen.
+ * amount. Tapping opens the edit sheet when `onPress` is passed, or the detail screen.
  */
-export function TransactionRow({ transaction }: TransactionRowProps) {
+export function TransactionRow({ transaction, onPress }: TransactionRowProps) {
   const themeColors = useThemeColors();
   const income = transaction.type === 'income';
   const color = transaction.categoryColor ?? themeColors.inkFaint;
@@ -38,23 +39,25 @@ export function TransactionRow({ transaction }: TransactionRowProps) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={title}
-      onPress={() =>
-        router.push({ pathname: '/transaction/[id]', params: { id: transaction.id } })
-      }
+      onPress={() => {
+        if (onPress) onPress();
+        else router.push({ pathname: '/transaction/[id]', params: { id: transaction.id } });
+      }}
       className="flex-row items-center py-3"
+      style={({ pressed }) => ({ opacity: pressed ? 0.78 : 1 })}
     >
       <View
-        className="h-10 w-10 items-center justify-center rounded-full"
-        style={{ backgroundColor: `${color}1A` }}
+        className="h-10 w-10 items-center justify-center rounded-pane border border-line bg-pane"
+        style={{ borderColor: `${color}55` }}
       >
         <Ionicons name={icon} size={18} color={color} />
       </View>
 
       <View className="ml-3 flex-1">
-        <Text className="text-base font-medium text-ink" numberOfLines={1}>
+        <Text className="font-body-medium text-[15px] text-ink" numberOfLines={1}>
           {title}
         </Text>
-        <Text className="mt-0.5 text-xs text-ink-muted" numberOfLines={1}>
+        <Text className="mt-0.5 font-body text-xs text-ink-muted" numberOfLines={1}>
           {subtitle}
         </Text>
       </View>
